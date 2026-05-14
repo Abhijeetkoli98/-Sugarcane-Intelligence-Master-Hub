@@ -1,6 +1,6 @@
 import streamlit as st
-import serial
 import time
+
 import requests
 import pandas as pd
 import numpy as np

@@ -1,0 +1,7 @@
+streamlit
+pyserial
+requests
+pandas
+numpy
+opencv-python-headless
+Pillow
