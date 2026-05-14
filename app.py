@@ -134,7 +134,7 @@ if 'api_history' not in st.session_state:
 
 # SIDEBAR: COMMAND CENTER
 st.sidebar.title("🎮 Command Center")
-nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
+nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
 st.sidebar.divider()
 if st.sidebar.button("Logout"):
     st.session_state.logged_in = False; st.rerun()
@@ -315,6 +315,85 @@ elif nav == "🌍 Weather Fusion Analysis":
             st.info(f"📍 Location: {city} | Fusion Latency: Real-time (2s)")
 
         time.sleep(2)
+
+# ==========================================
+# 🚜 MODE: FARMER STRATEGIC PORTAL
+# ==========================================
+elif nav == "🚜 Farmer Strategic Portal":
+    st.header("🚜 Farmer Strategic Input & Factory Link")
+    st.write("Plan your harvest and compare procurement offers from the region's top 5 factories.")
+    
+    # 1. Profile Input
+    with st.container():
+        c_in1, c_in2 = st.columns(2)
+        f_name = c_in1.text_input("Farmer Name", value="Abhijeet")
+        f_area = c_in2.number_input("Total Farm Area (Acres/Ekars)", value=5.0, min_value=0.1)
+    
+    st.divider()
+
+    # 2. Factory Fusion Engine (Simulated 5 Factory APIs)
+    factories = [
+        {"name": "Sahyadri Sugar Tech", "price": 3450, "recovery": 11.2, "distance": 12, "risk": "Low", "status": "Optimal"},
+        {"name": "Krishna Sahakari", "price": 3520, "recovery": 10.8, "distance": 28, "risk": "Medium", "status": "Congested"},
+        {"name": "Vasantdada Hub", "price": 3380, "recovery": 12.1, "distance": 45, "risk": "Low", "status": "Fast-Track"},
+        {"name": "Panchganga Mills", "price": 3490, "recovery": 11.5, "distance": 18, "risk": "High", "status": "Limited Slots"},
+        {"name": "Godavari Bio-Energy", "price": 3600, "recovery": 10.5, "distance": 62, "risk": "Medium", "status": "Export Focused"}
+    ]
+
+    # 3. Analytics Logic
+    avg_yield_per_acre = 42 # Tons per acre
+    est_production = f_area * avg_yield_per_acre
+    
+    st.subheader(f"📊 Strategy for {f_name}'s Farm ({f_area} Acres)")
+    
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Est. Production", f"{int(est_production)} Tons", "Based on Regional Avg")
+    m2.metric("Projected Health", "Good (84%)", "↑ 2% from last week")
+    m3.metric("Market Sentiment", "Bullish", "High Demand")
+
+    st.write("### 🏭 Factory Procurement Comparison")
+    
+    for factory in factories:
+        # Financial Calc
+        transport_cost = factory['distance'] * 15 * f_area # Simplified transport calc
+        gross_revenue = est_production * factory['price']
+        net_profit = gross_revenue - transport_cost
+        
+        with st.expander(f"🏢 {factory['name']} - Offer: ₹{factory['price']}/Ton"):
+            col1, col2, col3 = st.columns(3)
+            col1.write(f"**Net Profit Forecast:**")
+            col1.title(f"₹{int(net_profit):,}")
+            
+            col2.write(f"**Logistics:**")
+            col2.write(f"📍 Distance: {factory['distance']} km")
+            col2.write(f"🚚 Est. Transport: ₹{int(transport_cost):,}")
+            
+            col3.write(f"**Factory Health:**")
+            col3.write(f"✨ Recovery: {factory['recovery']}%")
+            risk_color = "red" if factory['risk'] == "High" else "green" if factory['risk'] == "Low" else "orange"
+            col3.markdown(f"⚠️ Risk: <span style='color:{risk_color}'>{factory['risk']}</span> ({factory['status']})", unsafe_allow_html=True)
+            
+            if factory['price'] == max([f['price'] for f in factories]):
+                st.success("⭐ Best Purchase Price detected for this factory.")
+            if net_profit == max([(est_production * f['price']) - (f['distance'] * 15 * f_area) for f in factories]):
+                st.info("💡 Recommendation: Highest Net Profit after transport costs.")
+
+    # 4. Future Risk & Growth Map
+    st.divider()
+    st.subheader("🔮 Future Risk Analysis (90 Day Outlook)")
+    
+    r_col1, r_col2 = st.columns(2)
+    with r_col1:
+        st.write("**Climate Risk**")
+        st.progress(25)
+        st.caption("Low Risk: Predicted monsoon alignment is optimal for harvest.")
+        
+    with r_col2:
+        st.write("**Price Volatility**")
+        st.progress(45)
+        st.caption("Moderate Risk: Global sugar prices showing slight fluctuations.")
+
+    st.info(f"💡 **AI Suggestion for {f_name}:** Based on your farm area of {f_area} acres, we suggest booking your slot with **{factories[0]['name']}** or **{factories[2]['name']}** within the next 15 days to maximize recovery bonuses.")
 
 # ==========================================
 # 🧪 MODE: SOIL NUTRIENT ANALYSIS
