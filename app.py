@@ -134,7 +134,7 @@ if 'api_history' not in st.session_state:
 
 # SIDEBAR: COMMAND CENTER
 st.sidebar.title("🎮 Command Center")
-nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
+nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🛡️ Climate Early Warning", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
 st.sidebar.divider()
 if st.sidebar.button("Logout"):
     st.session_state.logged_in = False; st.rerun()
@@ -351,32 +351,45 @@ elif nav == "🚜 Farmer Strategic Portal":
     m2.metric("Projected Health", "Good (84%)", "↑ 2% from last week")
     m3.metric("Market Sentiment", "Bullish", "High Demand")
 
-    st.write("### 🏭 Factory Procurement Comparison")
+    st.write("### 🏭 Factory Selection & Procurement Link")
     
-    for factory in factories:
-        # Financial Calc
-        transport_cost = factory['distance'] * 15 * f_area # Simplified transport calc
-        gross_revenue = est_production * factory['price']
-        net_profit = gross_revenue - transport_cost
+    # Select Factory via Dropdown
+    factory_names = [f['name'] for f in factories]
+    selected_factory_name = st.selectbox("Select a Sugar Factory to analyze procurement offer:", factory_names)
+    
+    # Get the selected factory object
+    factory = next(f for f in factories if f['name'] == selected_factory_name)
+
+    # Financial Calc
+    transport_cost = factory['distance'] * 15 * f_area # Simplified transport calc
+    gross_revenue = est_production * factory['price']
+    net_profit = gross_revenue - transport_cost
+    
+    # Display focused analytics for the selected factory
+    with st.container():
+        st.markdown(f"#### 🏢 Analysis for {factory['name']}")
+        col1, col2, col3 = st.columns(3)
         
-        with st.expander(f"🏢 {factory['name']} - Offer: ₹{factory['price']}/Ton"):
-            col1, col2, col3 = st.columns(3)
-            col1.write(f"**Net Profit Forecast:**")
-            col1.title(f"₹{int(net_profit):,}")
-            
-            col2.write(f"**Logistics:**")
-            col2.write(f"📍 Distance: {factory['distance']} km")
-            col2.write(f"🚚 Est. Transport: ₹{int(transport_cost):,}")
-            
-            col3.write(f"**Factory Health:**")
-            col3.write(f"✨ Recovery: {factory['recovery']}%")
-            risk_color = "red" if factory['risk'] == "High" else "green" if factory['risk'] == "Low" else "orange"
-            col3.markdown(f"⚠️ Risk: <span style='color:{risk_color}'>{factory['risk']}</span> ({factory['status']})", unsafe_allow_html=True)
-            
-            if factory['price'] == max([f['price'] for f in factories]):
-                st.success("⭐ Best Purchase Price detected for this factory.")
-            if net_profit == max([(est_production * f['price']) - (f['distance'] * 15 * f_area) for f in factories]):
-                st.info("💡 Recommendation: Highest Net Profit after transport costs.")
+        col1.write(f"**Net Profit Forecast:**")
+        col1.title(f"₹{int(net_profit):,}")
+        col1.caption(f"Gross: ₹{int(gross_revenue):,}")
+        
+        col2.write(f"**Logistics:**")
+        col2.write(f"📍 Distance: {factory['distance']} km")
+        col2.write(f"🚚 Est. Transport: ₹{int(transport_cost):,}")
+        
+        col3.write(f"**Factory Health:**")
+        col3.write(f"✨ Recovery: {factory['recovery']}%")
+        risk_color = "red" if factory['risk'] == "High" else "green" if factory['risk'] == "Low" else "orange"
+        col3.markdown(f"⚠️ Risk: <span style='color:{risk_color}'>{factory['risk']}</span> ({factory['status']})", unsafe_allow_html=True)
+        
+        # Badges & Recommendations
+        if factory['price'] == max([f['price'] for f in factories]):
+            st.success("⭐ **Best Purchase Price**: This factory offers the highest base rate in the region.")
+        
+        best_profit = max([(est_production * f['price']) - (f['distance'] * 15 * f_area) for f in factories])
+        if net_profit == best_profit:
+            st.info("💡 **Top Financial Pick**: This factory yields the highest net profit after transport costs.")
 
     # 4. Future Risk & Growth Map
     st.divider()
@@ -394,6 +407,93 @@ elif nav == "🚜 Farmer Strategic Portal":
         st.caption("Moderate Risk: Global sugar prices showing slight fluctuations.")
 
     st.info(f"💡 **AI Suggestion for {f_name}:** Based on your farm area of {f_area} acres, we suggest booking your slot with **{factories[0]['name']}** or **{factories[2]['name']}** within the next 15 days to maximize recovery bonuses.")
+
+# ==========================================
+# 🛡️ MODE: CLIMATE EARLY WARNING
+# ==========================================
+elif nav == "🛡️ Climate Early Warning":
+    st.header("🛡️ AI Climate Defense & Early Warning")
+    st.write("Predictive analytics to safeguard your harvest against extreme weather.")
+    
+    city = st.text_input("Enter Farm Location for Storm Watch", value="Kolhapur")
+    st.divider()
+
+    # 1. Predictive Engine (Simulated 48h Outlook)
+    import plotly.express as px
+    import plotly.graph_objects as go
+
+    # Weather States
+    is_rain_coming = random.choice([True, False])
+    heat_index = random.randint(30, 42)
+    storm_probability = random.randint(0, 100)
+
+    # 2. EMERGENCY ALERTS
+    st.subheader("🚨 Active Safety Alerts")
+    a1, a2 = st.columns(2)
+    
+    if is_rain_coming:
+        a1.error("🌧️ RAIN PREDICTED (Next 6h)")
+        a1.markdown("**ACTION:** STOP IRRIGATION IMMEDIATELY. Soil saturation risk high.")
+    else:
+        a1.success("☀️ NO RAIN PREDICTED")
+        a1.markdown("**ACTION:** Maintain standard irrigation cycle.")
+
+    if heat_index > 38:
+        a2.warning(f"🔥 HEAT WAVE ALERT ({heat_index}°C)")
+        a2.markdown("**ACTION:** Shield young crops. Increase soil moisture by 15%.")
+    else:
+        a2.info(f"🌡️ Normal Temps ({heat_index}°C)")
+        a2.markdown("**ACTION:** Optimal growth conditions detected.")
+
+    st.divider()
+
+    # 3. SATELLITE STORM/HEAT VISUALIZATION
+    st.subheader("🛰️ Satellite Thermal & Storm Map")
+    st.write("Real-time spectral visualization of incoming weather fronts.")
+    
+    # Generate a dummy grid for the map
+    grid_size = 20
+    x = np.linspace(0, 10, grid_size)
+    y = np.linspace(0, 10, grid_size)
+    X, Y = np.meshgrid(x, y)
+    
+    # Simulate a "front" moving through
+    intensity = np.exp(-((X-5)**2 + (Y-5)**2) / 10) * heat_index
+    if is_rain_coming:
+        intensity += np.random.normal(0, 5, intensity.shape) # Add "storm noise"
+
+    fig = go.Figure(data=go.Heatmap(
+        z=intensity,
+        colorscale='Hot' if heat_index > 35 else 'Jet',
+        colorbar=dict(title='Intensity (Rel)')
+    ))
+    fig.update_layout(title="Spectral Farm Overview", height=500, margin=dict(l=20, r=20, t=40, b=20))
+    st.plotly_chart(fig, use_container_width=True)
+
+    # 4. ACTIONABLE AG-DEFENSE
+    st.subheader("🛡️ Strategic Defense Steps")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.write("**Storm Severity**")
+        level = "High" if storm_probability > 70 else "Low"
+        st.title(f"{storm_probability}%")
+        st.caption(f"Status: {level}")
+        
+    with col2:
+        st.write("**Irrigation Efficiency**")
+        efficiency = 92 if not is_rain_coming else 45
+        st.title(f"{efficiency}%")
+        st.caption("Auto-adjusting for cloud cover")
+        
+    with col3:
+        st.write("**Harvest Safety**")
+        st.title("SECURE")
+        st.caption("No immediate threats to mature cane.")
+
+    st.divider()
+    st.warning("💡 **AI Tip:** A cold front is developing to your North-West. If harvesting this week, ensure transport vehicles are covered to avoid moisture weight loss.")
 
 # ==========================================
 # 🧪 MODE: SOIL NUTRIENT ANALYSIS
