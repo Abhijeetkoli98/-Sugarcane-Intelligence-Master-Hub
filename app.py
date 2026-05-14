@@ -10,6 +10,8 @@ import random
 from PIL import Image
 from collections import deque
 from datetime import datetime
+import plotly.express as px
+import plotly.graph_objects as go
 
 # --- SYSTEM CONFIGURATION ---
 LOG_FILE = "factory_master_v5.csv"
@@ -325,20 +327,24 @@ elif nav == "🚜 Farmer Strategic Portal":
     
     # 1. Profile Input
     with st.container():
-        c_in1, c_in2 = st.columns(2)
+        c_in1, c_in2, c_in3 = st.columns(3)
         f_name = c_in1.text_input("Farmer Name", value="Abhijeet")
-        f_area = c_in2.number_input("Total Farm Area (Acres/Ekars)", value=5.0, min_value=0.1)
+        f_area = c_in2.number_input("Total Farm Area (Acres)", value=5.0, min_value=0.1)
+        f_loc = c_in3.text_input("Farm Location", value="Satara")
     
     st.divider()
 
     # 2. Factory Fusion Engine (Simulated 5 Factory APIs)
-    factories = [
+    factories_data = [
         {"name": "Sahyadri Sugar Tech", "price": 3450, "recovery": 11.2, "distance": 12, "risk": "Low", "status": "Optimal"},
         {"name": "Krishna Sahakari", "price": 3520, "recovery": 10.8, "distance": 28, "risk": "Medium", "status": "Congested"},
         {"name": "Vasantdada Hub", "price": 3380, "recovery": 12.1, "distance": 45, "risk": "Low", "status": "Fast-Track"},
         {"name": "Panchganga Mills", "price": 3490, "recovery": 11.5, "distance": 18, "risk": "High", "status": "Limited Slots"},
         {"name": "Godavari Bio-Energy", "price": 3600, "recovery": 10.5, "distance": 62, "risk": "Medium", "status": "Export Focused"}
     ]
+
+    # Sort Factories by distance based on "Search" (Simulating nearest search)
+    factories = sorted(factories_data, key=lambda x: x['distance'])
 
     # 3. Analytics Logic
     avg_yield_per_acre = 42 # Tons per acre
@@ -353,9 +359,12 @@ elif nav == "🚜 Farmer Strategic Portal":
 
     st.write("### 🏭 Factory Selection & Procurement Link")
     
-    # Select Factory via Dropdown
-    factory_names = [f['name'] for f in factories]
-    selected_factory_name = st.selectbox("Select a Sugar Factory to analyze procurement offer:", factory_names)
+    # Select Factory via Dropdown (Sorted by Proximity)
+    factory_names = [f"{f['name']} ({f['distance']} km away)" for f in factories]
+    selected_name_full = st.selectbox("Select Nearest Factory (Sorted by Proximity):", factory_names)
+    
+    # Extract name from selection string
+    selected_factory_name = selected_name_full.split(" (")[0]
     
     # Get the selected factory object
     factory = next(f for f in factories if f['name'] == selected_factory_name)
@@ -419,8 +428,6 @@ elif nav == "🛡️ Climate Early Warning":
     st.divider()
 
     # 1. Predictive Engine (Simulated 48h Outlook)
-    import plotly.express as px
-    import plotly.graph_objects as go
 
     # Weather States
     is_rain_coming = random.choice([True, False])
