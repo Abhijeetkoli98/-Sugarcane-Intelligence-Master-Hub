@@ -16,6 +16,21 @@ import plotly.graph_objects as go
 # --- SYSTEM CONFIGURATION ---
 LOG_FILE = "factory_master_v5.csv"
 CREDENTIALS = {"admin": "factory123", "farmer": "field123"}
+
+# LOCAL FACTORY DATABASE (Fallback Intelligence)
+LOCAL_FACTORY_DB = {
+    "kodoli": {"name": "Warna Sugar Factory", "price": 3580, "recovery": 12.4, "distance": 4, "risk": "Low", "status": "Local Hub"},
+    "kolhapur": {"name": "Chh. Rajaram Factory", "price": 3510, "recovery": 11.8, "distance": 12, "risk": "Medium", "status": "Regional Hub"},
+    "satara": {"name": "Ajinkyatara Sugar Mill", "price": 3450, "recovery": 11.2, "distance": 9, "risk": "Low", "status": "Verified"},
+    "sangli": {"name": "Vasantdada Sahakari", "price": 3550, "recovery": 12.1, "distance": 15, "risk": "Medium", "status": "Congested"},
+    "pune": {"name": "Sahyadri Bio-Sugar", "price": 3400, "recovery": 10.9, "distance": 22, "risk": "Low", "status": "Optimized"},
+    "belgaum": {"name": "Hira Sugar Works", "price": 3620, "recovery": 12.8, "distance": 18, "risk": "Low", "status": "Export Focused"},
+    "karad": {"name": "Sahyadri Sahakari", "price": 3480, "recovery": 11.5, "distance": 7, "risk": "Low", "status": "Optimal"},
+    "ichalkaranji": {"name": "Dutta Sahakari", "price": 3530, "recovery": 11.9, "distance": 11, "risk": "Medium", "status": "Stable"},
+    "kagal": {"name": "Chh. Shahu Mill", "price": 3590, "recovery": 12.3, "distance": 5, "risk": "Low", "status": "Local Best"}
+}
+DEFAULT_FACTORY = {"name": "Maharashtra Cooperative Hub", "price": 3410, "recovery": 11.0, "distance": 30, "risk": "Medium", "status": "State Estimate"}
+
 st.set_page_config(page_title="Sugarcane AI Industrial Pro+", layout="wide", page_icon="🌾")
 
 # --- CUSTOM CSS (INDUSTRIAL DARK/LIGHT HIGH CONTRAST) ---
@@ -385,18 +400,6 @@ elif nav == "🚜 Farmer Strategic Portal":
     
     st.divider()
 
-    # 2. SMART LOCATION ENGINE (Matches input to real factories)
-    location_map = {
-        "kodoli": {"name": "Warna Sugar Factory", "price": 3580, "recovery": 12.4, "distance": 4, "risk": "Low", "status": "Optimal"},
-        "kolhapur": {"name": "Chh. Rajaram Factory", "price": 3510, "recovery": 11.8, "distance": 12, "risk": "Medium", "status": "Stable"},
-        "satara": {"name": "Ajinkyatara Sugar", "price": 3450, "recovery": 11.2, "distance": 9, "risk": "Low", "status": "Optimal"},
-        "sangli": {"name": "Vasantdada Hub", "price": 3550, "recovery": 12.1, "distance": 15, "risk": "Medium", "status": "Congested"},
-        "pune": {"name": "Sahyadri Tech", "price": 3400, "recovery": 10.9, "distance": 22, "risk": "Low", "status": "Fast-Track"}
-    }
-    
-    # Default fallback data
-    default_factory = {"name": "Regional Cooperative Hub", "price": 3420, "recovery": 11.0, "distance": 25, "risk": "Medium", "status": "Checking Capacity"}
-
     # 3. Analytics Logic
     avg_yield_per_acre = 42 
     est_production = f_area * avg_yield_per_acre
@@ -452,11 +455,24 @@ elif nav == "🚜 Farmer Strategic Portal":
                         for f in real_data[1:5]:
                             st.write(f"- **{f['name']}**: {f['distance']} km | ₹{f['price']}/Ton")
             else:
-                st.warning("⚠️ No real-world factory data found in OpenStreetMap for this location. Falling back to local database...")
-                # Fallback to smart simulation
+                st.warning("⚠️ Live API could not find a match. Switching to Local Intelligence Database...")
+                # Search Local DB
                 search_query = f_loc.lower().strip()
-                factory = location_map.get(search_query, default_factory)
-                st.info(f"Matched with: {factory['name']}")
+                factory = LOCAL_FACTORY_DB.get(search_query, DEFAULT_FACTORY)
+                
+                # Financial Calc
+                transport_cost = factory['distance'] * 15 * f_area 
+                gross_revenue = est_production * factory['price']
+                net_profit = gross_revenue - transport_cost
+
+                st.success(f"📂 LOCAL MATCH: Best partner for '{f_loc}' identified from internal records.")
+                with st.container():
+                    st.markdown(f"### 🏆 Local Best Match: {factory['name']}")
+                    st.caption("Data Source: Internal Factory Database (Local Fallback)")
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("Net Profit Forecast", f"₹{int(net_profit):,}", "Local Est.")
+                    c2.metric("Distance", f"{factory['distance']} km", "Approx. Proximity")
+                    c3.metric("Purchase Price", f"₹{factory['price']}/T", f"Recovery: {factory['recovery']}%")
     else:
         st.info(f"Enter your location (e.g. Kodoli) and click search to pull real-world factory data.")
 
