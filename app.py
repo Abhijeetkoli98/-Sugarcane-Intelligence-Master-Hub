@@ -351,32 +351,45 @@ elif nav == "🚜 Farmer Strategic Portal":
     m2.metric("Projected Health", "Good (84%)", "↑ 2% from last week")
     m3.metric("Market Sentiment", "Bullish", "High Demand")
 
-    st.write("### 🏭 Factory Procurement Comparison")
+    st.write("### 🏭 Factory Selection & Procurement Link")
     
-    for factory in factories:
-        # Financial Calc
-        transport_cost = factory['distance'] * 15 * f_area # Simplified transport calc
-        gross_revenue = est_production * factory['price']
-        net_profit = gross_revenue - transport_cost
+    # Select Factory via Dropdown
+    factory_names = [f['name'] for f in factories]
+    selected_factory_name = st.selectbox("Select a Sugar Factory to analyze procurement offer:", factory_names)
+    
+    # Get the selected factory object
+    factory = next(f for f in factories if f['name'] == selected_factory_name)
+
+    # Financial Calc
+    transport_cost = factory['distance'] * 15 * f_area # Simplified transport calc
+    gross_revenue = est_production * factory['price']
+    net_profit = gross_revenue - transport_cost
+    
+    # Display focused analytics for the selected factory
+    with st.container():
+        st.markdown(f"#### 🏢 Analysis for {factory['name']}")
+        col1, col2, col3 = st.columns(3)
         
-        with st.expander(f"🏢 {factory['name']} - Offer: ₹{factory['price']}/Ton"):
-            col1, col2, col3 = st.columns(3)
-            col1.write(f"**Net Profit Forecast:**")
-            col1.title(f"₹{int(net_profit):,}")
-            
-            col2.write(f"**Logistics:**")
-            col2.write(f"📍 Distance: {factory['distance']} km")
-            col2.write(f"🚚 Est. Transport: ₹{int(transport_cost):,}")
-            
-            col3.write(f"**Factory Health:**")
-            col3.write(f"✨ Recovery: {factory['recovery']}%")
-            risk_color = "red" if factory['risk'] == "High" else "green" if factory['risk'] == "Low" else "orange"
-            col3.markdown(f"⚠️ Risk: <span style='color:{risk_color}'>{factory['risk']}</span> ({factory['status']})", unsafe_allow_html=True)
-            
-            if factory['price'] == max([f['price'] for f in factories]):
-                st.success("⭐ Best Purchase Price detected for this factory.")
-            if net_profit == max([(est_production * f['price']) - (f['distance'] * 15 * f_area) for f in factories]):
-                st.info("💡 Recommendation: Highest Net Profit after transport costs.")
+        col1.write(f"**Net Profit Forecast:**")
+        col1.title(f"₹{int(net_profit):,}")
+        col1.caption(f"Gross: ₹{int(gross_revenue):,}")
+        
+        col2.write(f"**Logistics:**")
+        col2.write(f"📍 Distance: {factory['distance']} km")
+        col2.write(f"🚚 Est. Transport: ₹{int(transport_cost):,}")
+        
+        col3.write(f"**Factory Health:**")
+        col3.write(f"✨ Recovery: {factory['recovery']}%")
+        risk_color = "red" if factory['risk'] == "High" else "green" if factory['risk'] == "Low" else "orange"
+        col3.markdown(f"⚠️ Risk: <span style='color:{risk_color}'>{factory['risk']}</span> ({factory['status']})", unsafe_allow_html=True)
+        
+        # Badges & Recommendations
+        if factory['price'] == max([f['price'] for f in factories]):
+            st.success("⭐ **Best Purchase Price**: This factory offers the highest base rate in the region.")
+        
+        best_profit = max([(est_production * f['price']) - (f['distance'] * 15 * f_area) for f in factories])
+        if net_profit == best_profit:
+            st.info("💡 **Top Financial Pick**: This factory yields the highest net profit after transport costs.")
 
     # 4. Future Risk & Growth Map
     st.divider()
