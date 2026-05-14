@@ -357,48 +357,43 @@ elif nav == "🚜 Farmer Strategic Portal":
     m2.metric("Projected Health", "Good (84%)", "↑ 2% from last week")
     m3.metric("Market Sentiment", "Bullish", "High Demand")
 
-    st.write("### 🏭 Factory Selection & Procurement Link")
+    st.write("### 🏭 Factory Finder (Nearest Only)")
     
-    # Select Factory via Dropdown (Sorted by Proximity)
-    factory_names = [f"{f['name']} ({f['distance']} km away)" for f in factories]
-    selected_name_full = st.selectbox("Select Nearest Factory (Sorted by Proximity):", factory_names)
-    
-    # Extract name from selection string
-    selected_factory_name = selected_name_full.split(" (")[0]
-    
-    # Get the selected factory object
-    factory = next(f for f in factories if f['name'] == selected_factory_name)
+    if st.button("🔍 Search for Nearest Factory"):
+        # Sort and pick ONLY the nearest one
+        factories = sorted(factories_data, key=lambda x: x['distance'])
+        factory = factories[0]
 
-    # Financial Calc
-    transport_cost = factory['distance'] * 15 * f_area # Simplified transport calc
-    gross_revenue = est_production * factory['price']
-    net_profit = gross_revenue - transport_cost
-    
-    # Display focused analytics for the selected factory
-    with st.container():
-        st.markdown(f"#### 🏢 Analysis for {factory['name']}")
-        col1, col2, col3 = st.columns(3)
+        # Financial Calc
+        transport_cost = factory['distance'] * 15 * f_area # Simplified transport calc
+        gross_revenue = est_production * factory['price']
+        net_profit = gross_revenue - transport_cost
         
-        col1.write(f"**Net Profit Forecast:**")
-        col1.title(f"₹{int(net_profit):,}")
-        col1.caption(f"Gross: ₹{int(gross_revenue):,}")
-        
-        col2.write(f"**Logistics:**")
-        col2.write(f"📍 Distance: {factory['distance']} km")
-        col2.write(f"🚚 Est. Transport: ₹{int(transport_cost):,}")
-        
-        col3.write(f"**Factory Health:**")
-        col3.write(f"✨ Recovery: {factory['recovery']}%")
-        risk_color = "red" if factory['risk'] == "High" else "green" if factory['risk'] == "Low" else "orange"
-        col3.markdown(f"⚠️ Risk: <span style='color:{risk_color}'>{factory['risk']}</span> ({factory['status']})", unsafe_allow_html=True)
-        
-        # Badges & Recommendations
-        if factory['price'] == max([f['price'] for f in factories]):
-            st.success("⭐ **Best Purchase Price**: This factory offers the highest base rate in the region.")
-        
-        best_profit = max([(est_production * f['price']) - (f['distance'] * 15 * f_area) for f in factories])
-        if net_profit == best_profit:
-            st.info("💡 **Top Financial Pick**: This factory yields the highest net profit after transport costs.")
+        # Display ONLY the nearest factory with premium design
+        st.success(f"📍 Nearest Factory Found in {f_loc} Region!")
+        with st.container():
+            st.markdown(f"#### 🏆 Top Recommendation: {factory['name']}")
+            c1, c2, c3 = st.columns(3)
+            
+            c1.metric("Net Profit Forecast", f"₹{int(net_profit):,}", f"After Logistics")
+            c2.metric("Distance", f"{factory['distance']} km", "Nearest Available")
+            c3.metric("Purchase Price", f"₹{factory['price']}/T", f"Recovery: {factory['recovery']}%")
+            
+            st.divider()
+            
+            col_a, col_b = st.columns(2)
+            with col_a:
+                st.write("**Logistics Detail:**")
+                st.write(f"🚚 Est. Transport: ₹{int(transport_cost):,}")
+                st.write(f"⌛ Est. Arrival: {int(factory['distance']*2.5)} mins")
+            
+            with col_b:
+                st.write("**Risk Analysis:**")
+                risk_color = "red" if factory['risk'] == "High" else "green" if factory['risk'] == "Low" else "orange"
+                st.markdown(f"⚠️ Risk: <span style='color:{risk_color}'>{factory['risk']}</span> ({factory['status']})", unsafe_allow_html=True)
+                st.info(f"💡 AI Suggestion: Based on your area of {f_area} acres, booking {factory['name']} will maximize your ROI.")
+    else:
+        st.info("Click the search button above to find the best procurement deal in your area.")
 
     # 4. Future Risk & Growth Map
     st.divider()
@@ -454,50 +449,82 @@ elif nav == "🛡️ Climate Early Warning":
 
     st.divider()
 
-    # 3. SATELLITE STORM/HEAT VISUALIZATION
-    st.subheader("🛰️ Satellite Thermal & Storm Map")
-    st.write("Real-time spectral visualization of incoming weather fronts.")
+    # 3. SATELLITE STORM/HEAT VISUALIZATION (Labeled Area Map)
+    st.subheader("🛰️ Advanced Satellite Thermal Scan (Sector View)")
+    st.write("High-resolution spectral analysis with identified farm sectors.")
     
     # Generate a dummy grid for the map
-    grid_size = 20
-    x = np.linspace(0, 10, grid_size)
-    y = np.linspace(0, 10, grid_size)
-    X, Y = np.meshgrid(x, y)
-    
-    # Simulate a "front" moving through
-    intensity = np.exp(-((X-5)**2 + (Y-5)**2) / 10) * heat_index
-    if is_rain_coming:
-        intensity += np.random.normal(0, 5, intensity.shape) # Add "storm noise"
+    grid_size = 25
+    z = np.random.normal(heat_index, 2, (grid_size, grid_size))
+    # Add a "Heatwave" gradient
+    for i in range(grid_size):
+        for j in range(grid_size):
+            z[i][j] += (i + j) * 0.2
 
-    fig = go.Figure(data=go.Heatmap(
-        z=intensity,
-        colorscale='Hot' if heat_index > 35 else 'Jet',
-        colorbar=dict(title='Intensity (Rel)')
+    # Area Names (Labels)
+    area_names = ["North Plot", "South Plot", "East Field", "West Field", "Factory Zone", "River Belt", "Storage A"]
+    label_x = [5, 15, 20, 5, 12, 18, 2]
+    label_y = [20, 5, 12, 10, 12, 18, 18]
+
+    fig = go.Figure()
+    # Add Heatmap
+    fig.add_trace(go.Heatmap(
+        z=z,
+        colorscale='Viridis' if not is_rain_coming else 'Bluered',
+        colorbar=dict(title='Temp/Intensity')
     ))
-    fig.update_layout(title="Spectral Farm Overview", height=500, margin=dict(l=20, r=20, t=40, b=20))
+    # Add Labels
+    fig.add_trace(go.Scatter(
+        x=label_x, y=label_y,
+        mode='text+markers',
+        text=area_names,
+        textposition="top center",
+        marker=dict(size=10, color="white"),
+        name="Sector Labels"
+    ))
+
+    fig.update_layout(
+        title=f"Satellite Thermal Analysis: {city} Region",
+        height=600,
+        xaxis=dict(showgrid=False, zeroline=False),
+        yaxis=dict(showgrid=False, zeroline=False)
+    )
     st.plotly_chart(fig, use_container_width=True)
 
-    # 4. ACTIONABLE AG-DEFENSE
-    st.subheader("🛡️ Strategic Defense Steps")
+    # 4. WIND DIRECTION & CROP STRESS
+    st.divider()
+    w_col1, w_col2 = st.columns(2)
     
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.write("**Storm Severity**")
-        level = "High" if storm_probability > 70 else "Low"
-        st.title(f"{storm_probability}%")
-        st.caption(f"Status: {level}")
+    with w_col1:
+        st.subheader("💨 Wind Direction Radar")
+        wind_speed = random.randint(5, 45)
+        wind_deg = random.randint(0, 360)
         
-    with col2:
-        st.write("**Irrigation Efficiency**")
-        efficiency = 92 if not is_rain_coming else 45
-        st.title(f"{efficiency}%")
-        st.caption("Auto-adjusting for cloud cover")
+        # Compass/Radar Plot
+        fig_wind = go.Figure(go.Scatterpolar(
+            r = [0, wind_speed],
+            theta = [0, wind_deg],
+            mode = 'lines+markers',
+            marker=dict(size=15, color="red")
+        ))
+        fig_wind.update_layout(
+            polar=dict(angularaxis=dict(direction="clockwise", period=360)),
+            height=300, margin=dict(l=20, r=20, t=20, b=20)
+        )
+        st.plotly_chart(fig_wind, use_container_width=True)
+        st.write(f"Current Wind: **{wind_speed} km/h** from **{wind_deg}°**")
+
+    with w_col2:
+        st.subheader("💧 Crop Stress & Evapotranspiration")
+        stress_level = (heat_index * wind_speed) / 50
+        st.write("**Evapotranspiration Rate:**")
+        st.progress(min(stress_level/10, 1.0))
+        st.write(f"Estimated Water Loss: **{round(stress_level/5, 1)} mm/day**")
         
-    with col3:
-        st.write("**Harvest Safety**")
-        st.title("SECURE")
-        st.caption("No immediate threats to mature cane.")
+        if stress_level > 20:
+            st.error("🚨 HIGH CROP STRESS: Immediate misting or heavy irrigation required.")
+        else:
+            st.success("✅ STRESS LEVEL: OPTIMAL. Plants are transpiring at normal rates.")
 
     st.divider()
     st.warning("💡 **AI Tip:** A cold front is developing to your North-West. If harvesting this week, ensure transport vehicles are covered to avoid moisture weight loss.")
