@@ -783,4 +783,21 @@ else:
             if st.button("🗑️ Purge Logs"):
                 os.remove(LOG_FILE); st.success("Log file purged."); st.rerun()
     else:
-        st.info("📂 No logs found. Start monitoring to generate records.")
+        st.info("📂 No audit logs found. This happens if no monitoring has been started yet.")
+        if st.button("🚀 Initialize with Professional Sample Data"):
+            import datetime
+            sample_data = []
+            for i in range(50):
+                ts = (datetime.datetime.now() - datetime.timedelta(hours=i)).strftime("%Y-%m-%d %H:%M:%S")
+                sample_data.append({
+                    "Timestamp": ts,
+                    "L": random.randint(400, 800),
+                    "T": random.uniform(22.0, 35.0),
+                    "H": random.uniform(50.0, 80.0),
+                    "Y": random.uniform(35.0, 45.0),
+                    "Status": "Optimal" if i % 10 != 0 else "Critical Spike Detected"
+                })
+            pd.DataFrame(sample_data).to_csv(LOG_FILE, index=False)
+            st.success("Industrial Master Log initialized with 50 sample records.")
+            st.rerun()
+        st.caption("Or start the 'Ground Sensors' or 'Weather Fusion' modules to begin live logging.")
