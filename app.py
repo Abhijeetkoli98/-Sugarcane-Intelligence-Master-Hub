@@ -75,6 +75,33 @@ def process_satellite_ai(uploaded_file):
     score = round((np.sum(gli > 0.08) / gli.size) * 100, 2)
     return img, health_map_colored, score
 
+def get_sensor_readings():
+    """Universal sensor interface (Serial + Simulation fallback)"""
+    try:
+        if 'ser' not in st.session_state:
+            import serial
+            st.session_state.ser = serial.Serial("COM8", 9600, timeout=1)
+        ser = st.session_state.ser
+    except: ser = None
+
+    l, t, h = None, None, None
+    is_sim = False
+    
+    if ser and ser.in_waiting > 0:
+        try:
+            line = ser.readline().decode(errors='ignore').strip()
+            if "," in line: l, t, h = map(float, line.split(","))
+        except: pass
+    
+    if l is None:
+        # High-Fidelity Simulation for Presentation
+        l = random.randint(400, 900)
+        t = 28 + random.uniform(-1, 1)
+        h = 60 + random.uniform(-2, 2)
+        is_sim = True
+        
+    return l, t, h, is_sim
+
 # --- AUTH LAYER ---
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
@@ -174,29 +201,9 @@ elif nav == "📡 Ground Sensors (IoT)":
         st.subheader("📊 Session Statistics")
         stats_ph = st.empty()
 
-    # SERIAL ENGINE
-    try:
-        if 'ser' not in st.session_state:
-            import serial
-            st.session_state.ser = serial.Serial("COM8", 9600, timeout=1)
-        ser = st.session_state.ser
-    except: ser = None
-
+    # --- SENSOR ENGINE ---
     while True:
-        # Data Stream
-        l, t, h = None, None, None
-        is_sim = False
-        if ser and ser.in_waiting > 0:
-            try:
-                line = ser.readline().decode(errors='ignore').strip()
-                if "," in line: l, t, h = map(float, line.split(","))
-            except: pass
-        else:
-            # High-Fidelity Simulation for Presentation
-            l = random.randint(400, 900)
-            t = 28 + random.uniform(-1, 1)
-            h = 60 + random.uniform(-2, 2)
-            is_sim = True; time.sleep(1)
+        l, t, h, is_sim = get_sensor_readings()
 
         if l is not None:
             st.session_state.history.append({"L":l, "T":t, "H":h})
@@ -219,7 +226,7 @@ elif nav == "📡 Ground Sensors (IoT)":
                 st.write(f"Avg Temp: {round(df_curr['T'].mean(),1)}°C")
                 st.write(f"Max Humidity: {round(df_curr['H'].max(),1)}%")
 
-        time.sleep(0.1)
+        time.sleep(1) # Frequency control
 
 # ==========================================
 # 🌍 MODE: WEATHER FUSION ANALYSIS
@@ -230,7 +237,9 @@ elif nav == "🌍 Weather Fusion Analysis":
     
     city = st.text_input("Enter City for API Sync", value="Pune")
     
-    # Simulation/Fetch Logic for API
+    # Get latest sensor and API data
+    s_l, s_t, s_h, s_is_sim = get_sensor_readings()
+    st.session_state.history.append({"L":s_l, "T":s_t, "H":s_h})
     api_key = "bd5e378503939ddaee76f12ad7a97608" # Placeholder
     weather_data = get_weather(api_key, city)
     
@@ -281,9 +290,11 @@ elif nav == "🌍 Weather Fusion Analysis":
     with chart_col1:
         st.subheader("🌡️ Temperature Convergence")
         if not history_df.empty and not api_df.empty:
+            # Align lengths to avoid ValueError
+            min_len = min(len(history_df), len(api_df), 20)
             comp_t = pd.DataFrame({
-                "Local Sensor": history_df['T'].tail(20).values,
-                "Regional API": api_df['T_API'].tail(20).values
+                "Local Sensor": history_df['T'].tail(min_len).values,
+                "Regional API": api_df['T_API'].tail(min_len).values
             })
             st.area_chart(comp_t)
         else:
@@ -292,9 +303,11 @@ elif nav == "🌍 Weather Fusion Analysis":
     with chart_col2:
         st.subheader("💧 Humidity Variance")
         if not history_df.empty and not api_df.empty:
+            # Align lengths
+            min_len = min(len(history_df), len(api_df), 20)
             comp_h = pd.DataFrame({
-                "Local Sensor": history_df['H'].tail(20).values,
-                "Regional API": api_df['H_API'].tail(20).values
+                "Local Sensor": history_df['H'].tail(min_len).values,
+                "Regional API": api_df['H_API'].tail(min_len).values
             })
             st.line_chart(comp_h)
         else:
