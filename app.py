@@ -266,7 +266,7 @@ if 'api_history' not in st.session_state:
 
 # SIDEBAR: COMMAND CENTER
 st.sidebar.title("🎮 Command Center")
-nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
+nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🔮 AI Harvest Predictor", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
 st.sidebar.divider()
 if st.sidebar.button("Logout"):
     st.session_state.logged_in = False; st.rerun()
@@ -554,6 +554,91 @@ elif nav == "🚜 Farmer Strategic Portal":
 
     st.info(f"💡 **AI Suggestion for {f_name}:** Based on your farm area of {f_area} acres, we suggest monitoring local recovery rates and booking your procurement slot early to maximize your transport bonuses.")
 
+
+# ==========================================
+# 🔮 MODE: AI HARVEST PREDICTOR
+# ==========================================
+elif nav == "🔮 AI Harvest Predictor":
+    st.header("🔮 Precision AI Harvest Predictor")
+    st.write("Professional ML-driven analytics for long-term agricultural strategy.")
+    
+    with st.expander("📝 Manual Parameter Entry (Farmer Input)", expanded=True):
+        c1, c2, c3 = st.columns(3)
+        temp_in = c1.slider("Average Temperature (°C)", 10, 50, 28)
+        hum_in = c2.slider("Humidity (%)", 10, 100, 60)
+        light_in = c3.slider("Light Intensity (Lux)", 100, 2000, 800)
+        
+        c4, c5, c6 = st.columns(3)
+        soil_type = c4.selectbox("Soil Condition", ["Black Loamy", "Red Sandy", "Clayey", "Saline"])
+        irrigation_freq = c5.selectbox("Irrigation Frequency", ["Daily", "Weekly", "Bi-Weekly", "Monthly"])
+        fertilizer_type = c6.selectbox("Fertilizer Usage", ["Organic/Compost", "NPK Balanced", "Urea High-Nitrogen", "None"])
+        
+        c7, c8 = st.columns(2)
+        crop_age = c7.number_input("Current Crop Age (Months)", 0, 18, 6)
+        farm_size = c8.number_input("Total Area (Acres)", 0.1, 500.0, 5.0)
+
+    # --- AI PREDICTION ENGINE ---
+    st.divider()
+    
+    # 1. Health Logic
+    score = 0
+    if 25 <= temp_in <= 33: score += 20
+    if 50 <= hum_in <= 75: score += 20
+    if light_in > 600: score += 15
+    if irrigation_freq in ["Daily", "Weekly"]: score += 20
+    if fertilizer_type != "None": score += 25
+    
+    if score >= 80: health = "Good"; h_color = "green"
+    elif score >= 50: health = "Average"; h_color = "orange"
+    else: health = "Poor"; h_color = "red"
+    
+    # 2. Performance Scoring
+    perf_score = score
+    
+    # 3. Yield Forecasting (5 Years)
+    base_yield = 40.0 # Tons per acre
+    health_mult = 1.2 if health == "Good" else 0.8 if health == "Average" else 0.4
+    initial_yield = farm_size * base_yield * health_mult
+    
+    years = [f"Year {i+1}" for i in range(5)]
+    # Trend logic: growth based on health
+    growth_rate = 0.05 if health == "Good" else 0.01 if health == "Average" else -0.10
+    yield_trend = [initial_yield * (1 + growth_rate)**i for i in range(5)]
+    
+    # --- DASHBOARD VISUALS ---
+    res1, res2, res3 = st.columns(3)
+    res1.metric("Predicted Health", health, delta=f"{score}% Confidence", delta_color="normal")
+    res2.metric("Performance Score", f"{perf_score}/100", "Growth Potential")
+    res3.metric("Est. Total Revenue (Y1)", f"₹{int(initial_yield * 3500):,}")
+
+    st.subheader("📈 5-Year Yield Projection")
+    fig_yield = px.line(x=years, y=yield_trend, markers=True, title="Predicted Harvest Volume (Tons)")
+    fig_yield.update_traces(line_color="green" if health == "Good" else "orange")
+    st.plotly_chart(fig_yield, use_container_width=True)
+    
+    # --- RECOMMENDATION & RISK ---
+    st.divider()
+    rec_col, risk_col = st.columns(2)
+    
+    with rec_col:
+        st.subheader("💡 Expert Recommendations")
+        if irrigation_freq in ["Bi-Weekly", "Monthly"]:
+            st.info("💧 **Irrigation**: Upgrade to Weekly frequency to optimize sucrose concentration.")
+        if soil_type == "Saline":
+            st.warning("🌱 **Soil Care**: Add Gypsum to counter salinity and improve root health.")
+        if fertilizer_type == "None":
+            st.error("🧪 **Fertilizer**: Apply NPK 10-26-26 to boost growth in month {crop_age+1}.")
+        if health == "Good":
+            st.success("✅ **Maintenance**: Current parameters are optimal. Continue spectral monitoring.")
+
+    with risk_col:
+        st.subheader("🚨 Risk Forecast")
+        if temp_in > 38:
+            st.error("🔥 **Heat Stress**: 70% probability of leaf burn. Increase soil moisture.")
+        elif score < 50:
+            st.error("📉 **Yield Loss**: High risk of 40% production drop due to environmental stress.")
+        else:
+            st.success("🌤️ **Stability**: Low risk environment. No immediate threats detected.")
 
 # ==========================================
 # 🧪 MODE: SOIL NUTRIENT ANALYSIS
