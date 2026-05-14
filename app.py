@@ -266,7 +266,7 @@ if 'api_history' not in st.session_state:
 
 # SIDEBAR: COMMAND CENTER
 st.sidebar.title("🎮 Command Center")
-nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🔮 AI Harvest Predictor", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
+nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🔮 AI Harvest Predictor", "🏢 Factory Storage Optimizer", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
 st.sidebar.divider()
 if st.sidebar.button("Logout"):
     st.session_state.logged_in = False; st.rerun()
@@ -639,6 +639,84 @@ elif nav == "🔮 AI Harvest Predictor":
             st.error("📉 **Yield Loss**: High risk of 40% production drop due to environmental stress.")
         else:
             st.success("🌤️ **Stability**: Low risk environment. No immediate threats detected.")
+
+# ==========================================
+# 🏢 MODE: FACTORY STORAGE OPTIMIZER
+# ==========================================
+elif nav == "🏢 Factory Storage Optimizer":
+    st.header("🏢 Industrial Storage Intelligence & Spoilage AI")
+    st.write("Advanced decision support for factory managers to minimize post-harvest sucrose loss.")
+    
+    # 1. Multi-Unit Monitoring
+    unit_id = st.selectbox("Select Storage Asset / Unit", ["Silo Alpha (Primary)", "Silo Beta (Overflow)", "Warehouse 01 (Buffer)", "Warehouse 02 (Processing)"])
+    
+    with st.expander(f"📥 Industrial Parameter Input: {unit_id}", expanded=True):
+        col1, col2, col3 = st.columns(3)
+        s_temp = col1.slider("Storage Temperature (°C)", 15.0, 45.0, 22.0)
+        s_hum = col2.slider("Relative Humidity (%)", 30, 95, 65)
+        s_light = col3.selectbox("Exposure Level", ["Dark / Shielded", "Subdued", "Ambient", "Direct Sun"])
+        
+        col4, col5, col6 = st.columns(3)
+        s_dur = col4.number_input("Current Storage Duration (Days)", 0, 120, 5)
+        s_qty = col5.number_input("Stashed Quantity (Metric Tons)", 100, 50000, 5000)
+        s_vent = col6.selectbox("Ventilation Status", ["Active Forced", "Natural Draft", "Restricted", "Stagnant"])
+
+    # --- AI DEGRADATION ENGINE ---
+    st.divider()
+    
+    # Sucrose Loss Logic (Simplified Industrial Model)
+    # Loss accelerates above 25C and 70% humidity
+    temp_factor = max(0, (s_temp - 25)) * 1.5
+    hum_factor = max(0, (s_hum - 70)) * 0.8
+    vent_penalty = 1.0 if s_vent == "Stagnant" else 0.5 if s_vent == "Restricted" else 0
+    
+    daily_decay_rate = (temp_factor + hum_factor + (vent_penalty * 10)) / 100 # % loss per day
+    total_degradation = s_dur * daily_decay_rate
+    quality_score = max(0, 100 - total_degradation)
+    
+    # Categorize
+    if quality_score > 85: q_label = "Optimal (Premium)"; q_color = "green"
+    elif quality_score > 65: q_label = "Stable (Processable)"; q_color = "orange"
+    else: q_label = "Critical (High Spoilage)"; q_color = "red"
+
+    # --- ANALYTICS DASHBOARD ---
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Storage Integrity", q_label)
+    m2.metric("Sucrose Loss Index", f"{round(total_degradation, 2)}%", delta=f"{round(daily_decay_rate,2)}%/day", delta_color="inverse")
+    m3.metric("Est. Industrial Value Loss", f"₹{int(s_qty * (total_degradation/100) * 3500):,}", "At Current Recovery")
+
+    # Trend Visualization
+    st.subheader("📅 Quality Degradation Outlook (Next 30 Days)")
+    future_days = list(range(s_dur, s_dur + 31))
+    future_quality = [max(0, 100 - (d * daily_decay_rate)) for d in future_days]
+    
+    fig_decay = px.area(x=future_days, y=future_quality, labels={'x': 'Storage Day', 'y': 'Quality Score (%)'}, title=f"AI Spoilage Prediction: {unit_id}")
+    fig_decay.update_traces(line_color="red" if quality_score < 70 else "blue")
+    st.plotly_chart(fig_decay, use_container_width=True)
+
+    # --- RECOMMENDATION & PRIORITY ALERTS ---
+    st.divider()
+    rec_col, alert_col = st.columns(2)
+    
+    with rec_col:
+        st.subheader("🛠️ Management Optimization")
+        if s_temp > 30:
+            st.info("❄️ **Cooling**: Activate industrial chillers. Target 22°C to halve sucrose inversion rates.")
+        if s_hum > 75:
+            st.warning("💨 **Dehumidification**: Activate exhaust fans. Current humidity promotes fungal growth.")
+        if s_vent == "Stagnant":
+            st.error("🌪️ **Ventilation**: Immediate override required. Natural draft is insufficient for current volume.")
+        if quality_score > 90:
+            st.success("✨ **Practice**: Current storage protocol is Grade-A. No adjustments needed.")
+
+    with alert_col:
+        st.subheader("⚠️ Priority Action Alerts")
+        if quality_score < 60:
+            st.error(f"🚨 **IMMEDIATE DISPATCH**: Spoilage risk in {unit_id} exceeds 40%. Move to crushing within 12 hours.")
+        elif total_degradation > 10:
+            st.warning("🔔 **MODERATE PRIORITY**: Schedule this unit for the next production batch to prevent further loss.")
+        else:
+            st.success("🛡️ **SAFE**: Unit remains in the safety zone for the next 72 hours.")
 
 # ==========================================
 # 🧪 MODE: SOIL NUTRIENT ANALYSIS
