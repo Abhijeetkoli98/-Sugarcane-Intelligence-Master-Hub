@@ -136,7 +136,7 @@ if 'api_history' not in st.session_state:
 
 # SIDEBAR: COMMAND CENTER
 st.sidebar.title("🎮 Command Center")
-nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🛡️ Climate Early Warning", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
+nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
 st.sidebar.divider()
 if st.sidebar.button("Logout"):
     st.session_state.logged_in = False; st.rerun()
@@ -411,132 +411,6 @@ elif nav == "🚜 Farmer Strategic Portal":
 
     st.info(f"💡 **AI Suggestion for {f_name}:** Based on your farm area of {f_area} acres, we suggest booking your slot with **{factories[0]['name']}** or **{factories[2]['name']}** within the next 15 days to maximize recovery bonuses.")
 
-# ==========================================
-# 🛡️ MODE: CLIMATE EARLY WARNING
-# ==========================================
-elif nav == "🛡️ Climate Early Warning":
-    st.header("🛡️ AI Climate Defense & Early Warning")
-    st.write("Predictive analytics to safeguard your harvest against extreme weather.")
-    
-    city = st.text_input("Enter Farm Location for Storm Watch", value="Kolhapur")
-    st.divider()
-
-    # 1. Predictive Engine (Simulated 48h Outlook)
-
-    # Weather States
-    is_rain_coming = random.choice([True, False])
-    heat_index = random.randint(30, 42)
-    storm_probability = random.randint(0, 100)
-
-    # 2. EMERGENCY ALERTS
-    st.subheader("🚨 Active Safety Alerts")
-    a1, a2 = st.columns(2)
-    
-    if is_rain_coming:
-        a1.error("🌧️ RAIN PREDICTED (Next 6h)")
-        a1.markdown("**ACTION:** STOP IRRIGATION IMMEDIATELY. Soil saturation risk high.")
-    else:
-        a1.success("☀️ NO RAIN PREDICTED")
-        a1.markdown("**ACTION:** Maintain standard irrigation cycle.")
-
-    if heat_index > 38:
-        a2.warning(f"🔥 HEAT WAVE ALERT ({heat_index}°C)")
-        a2.markdown("**ACTION:** Shield young crops. Increase soil moisture by 15%.")
-    else:
-        a2.info(f"🌡️ Normal Temps ({heat_index}°C)")
-        a2.markdown("**ACTION:** Optimal growth conditions detected.")
-
-    st.divider()
-
-    # 3. SATELLITE THERMAL ANALYSIS (Bar Format)
-    st.subheader("🛰️ Sector-Wise Thermal Scan (Bar Analysis)")
-    st.write("Comparing thermal intensity across identified farm sectors.")
-    
-    # Area Names and Data
-    area_names = ["North Plot", "South Plot", "East Field", "West Field", "Factory Zone", "River Belt", "Storage A"]
-    sector_temps = [random.randint(28, 42) for _ in area_names]
-    
-    fig_bar = px.bar(
-        x=area_names, y=sector_temps, 
-        color=sector_temps, 
-        color_continuous_scale='Turbo',
-        labels={'x': 'Farm Sector', 'y': 'Heat Index (°C)'},
-        title=f"Spectral Analysis for {city} Farm"
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
-
-    # 4. ANIMATED GEOGRAPHIC WIND FLOW MAP
-    st.divider()
-    st.subheader("💨 Animated Wind Flow Geographic Map")
-    st.write("Dynamic vector simulation showing real-time wind currents across sectors.")
-
-    # Create Geographic Grid
-    grid_res = 10
-    x_grid = np.linspace(0, 10, grid_res)
-    y_grid = np.linspace(0, 10, grid_res)
-    
-    wind_speed = random.randint(10, 40)
-    wind_deg = random.randint(0, 360)
-    u = np.cos(np.radians(wind_deg)) * wind_speed
-    v = np.sin(np.radians(wind_deg)) * wind_speed
-
-    # Create Animation Frames
-    frames = []
-    for t in range(5):
-        # Shift the start positions slightly to simulate movement
-        offset = t * 0.5
-        fig_frame = go.Frame(data=[go.Scatter(
-            x=[xi + offset % 2 for xi in np.repeat(x_grid, grid_res)],
-            y=[yi for yi in np.tile(y_grid, grid_res)],
-            mode='markers',
-            marker=dict(symbol="arrow", angle=wind_deg, size=15, color="cyan")
-        )])
-        frames.append(fig_frame)
-
-    # Base Figure
-    fig_anim = go.Figure(
-        data=[go.Scatter(
-            x=[xi for xi in np.repeat(x_grid, grid_res)],
-            y=[yi for yi in np.tile(y_grid, grid_res)],
-            mode='markers+text',
-            text=["Farm Sector" if i % 15 == 0 else "" for i in range(grid_res**2)],
-            textposition="top center",
-            marker=dict(symbol="arrow", angle=wind_deg, size=15, color="cyan")
-        )],
-        layout=go.Layout(
-            xaxis=dict(range=[-1, 12], showgrid=False, zeroline=False),
-            yaxis=dict(range=[-1, 11], showgrid=False, zeroline=False),
-            updatemenus=[dict(type="buttons", buttons=[dict(label="Play Animation", method="animate", args=[None])])],
-            title=f"Wind Vector Flow: {wind_speed} km/h from {wind_deg}°",
-            height=500
-        ),
-        frames=frames
-    )
-    
-    # Add Sector Labels as overlay
-    fig_anim.add_trace(go.Scatter(
-        x=[2, 8, 5, 2, 8], y=[8, 8, 5, 2, 2],
-        mode='text',
-        text=["North Plot", "East Field", "Processing", "South Plot", "River Belt"],
-        textfont=dict(size=14, color="white")
-    ))
-
-    st.plotly_chart(fig_anim, use_container_width=True)
-
-    # 5. CROP STRESS & DEFENSE
-    st.subheader("💧 Crop Stress & Evapotranspiration")
-    stress_level = (heat_index * wind_speed) / 50
-    st.write("**Evapotranspiration Rate:**")
-    st.progress(min(stress_level/10, 1.0))
-    st.write(f"Estimated Water Loss: **{round(stress_level/5, 1)} mm/day**")
-    
-    if stress_level > 20:
-        st.error("🚨 HIGH CROP STRESS: Immediate misting or heavy irrigation required.")
-    else:
-        st.success("✅ STRESS LEVEL: OPTIMAL. Plants are transpiring at normal rates.")
-
-    st.divider()
-    st.warning("💡 **AI Tip:** A cold front is developing to your North-West. If harvesting this week, ensure transport vehicles are covered to avoid moisture weight loss.")
 
 # ==========================================
 # 🧪 MODE: SOIL NUTRIENT ANALYSIS
