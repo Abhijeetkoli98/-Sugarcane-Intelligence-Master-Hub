@@ -281,9 +281,11 @@ elif nav == "🌍 Weather Fusion Analysis":
     with chart_col1:
         st.subheader("🌡️ Temperature Convergence")
         if not history_df.empty and not api_df.empty:
+            # Align lengths to avoid ValueError
+            min_len = min(len(history_df), len(api_df), 20)
             comp_t = pd.DataFrame({
-                "Local Sensor": history_df['T'].tail(20).values,
-                "Regional API": api_df['T_API'].tail(20).values
+                "Local Sensor": history_df['T'].tail(min_len).values,
+                "Regional API": api_df['T_API'].tail(min_len).values
             })
             st.area_chart(comp_t)
         else:
@@ -292,9 +294,11 @@ elif nav == "🌍 Weather Fusion Analysis":
     with chart_col2:
         st.subheader("💧 Humidity Variance")
         if not history_df.empty and not api_df.empty:
+            # Align lengths
+            min_len = min(len(history_df), len(api_df), 20)
             comp_h = pd.DataFrame({
-                "Local Sensor": history_df['H'].tail(20).values,
-                "Regional API": api_df['H_API'].tail(20).values
+                "Local Sensor": history_df['H'].tail(min_len).values,
+                "Regional API": api_df['H_API'].tail(min_len).values
             })
             st.line_chart(comp_h)
         else:
