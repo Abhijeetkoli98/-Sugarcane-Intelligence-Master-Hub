@@ -524,15 +524,16 @@ elif nav == "🛡️ Climate Early Warning":
     st.plotly_chart(fig_anim, use_container_width=True)
 
     # 5. CROP STRESS & DEFENSE
-        stress_level = (heat_index * wind_speed) / 50
-        st.write("**Evapotranspiration Rate:**")
-        st.progress(min(stress_level/10, 1.0))
-        st.write(f"Estimated Water Loss: **{round(stress_level/5, 1)} mm/day**")
-        
-        if stress_level > 20:
-            st.error("🚨 HIGH CROP STRESS: Immediate misting or heavy irrigation required.")
-        else:
-            st.success("✅ STRESS LEVEL: OPTIMAL. Plants are transpiring at normal rates.")
+    st.subheader("💧 Crop Stress & Evapotranspiration")
+    stress_level = (heat_index * wind_speed) / 50
+    st.write("**Evapotranspiration Rate:**")
+    st.progress(min(stress_level/10, 1.0))
+    st.write(f"Estimated Water Loss: **{round(stress_level/5, 1)} mm/day**")
+    
+    if stress_level > 20:
+        st.error("🚨 HIGH CROP STRESS: Immediate misting or heavy irrigation required.")
+    else:
+        st.success("✅ STRESS LEVEL: OPTIMAL. Plants are transpiring at normal rates.")
 
     st.divider()
     st.warning("💡 **AI Tip:** A cold front is developing to your North-West. If harvesting this week, ensure transport vehicles are covered to avoid moisture weight loss.")
