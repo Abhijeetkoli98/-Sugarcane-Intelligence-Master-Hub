@@ -236,94 +236,85 @@ elif nav == "🌍 Weather Fusion Analysis":
     st.write("Comparing real-time local sensor data against regional satellite weather APIs.")
     
     city = st.text_input("Enter City for API Sync", value="Pune")
-    
-    # Get latest sensor and API data
-    s_l, s_t, s_h, s_is_sim = get_sensor_readings()
-    st.session_state.history.append({"L":s_l, "T":s_t, "H":s_h})
-    api_key = "bd5e378503939ddaee76f12ad7a97608" # Placeholder
-    weather_data = get_weather(api_key, city)
-    
-    if weather_data:
-        api_temp = weather_data['main']['temp']
-        api_hum = weather_data['main']['humidity']
-        st.session_state.api_history.append({"T_API": api_temp, "H_API": api_hum, "Time": datetime.now().strftime("%H:%M")})
-    else:
-        # Fallback to smart simulation if API fails/No Key
-        api_temp = 30 + random.uniform(-2, 2)
-        api_hum = 55 + random.uniform(-5, 5)
-        st.session_state.api_history.append({"T_API": api_temp, "H_API": api_hum, "Time": datetime.now().strftime("%H:%M")})
-
-    # Get latest sensor data
-    if st.session_state.history:
-        last_sensor = st.session_state.history[-1]
-        s_t, s_h = last_sensor['T'], last_sensor['H']
-    else:
-        s_t, s_h = 28.5, 62.0 # Default/Fallback
-
-    # --- TOP COMPARISON METRICS ---
-    c1, c2, c3 = st.columns(3)
-    
-    t_delta = s_t - api_temp
-    h_delta = s_h - api_hum
-    
-    with c1:
-        st.metric("Temperature Comparison", f"{round(s_t, 1)}°C", f"{round(t_delta, 1)}°C vs API", delta_color="inverse")
-        st.caption(f"API Current: {round(api_temp, 1)}°C")
-        
-    with c2:
-        st.metric("Humidity Comparison", f"{round(s_h, 1)}%", f"{round(h_delta, 1)}% vs API")
-        st.caption(f"API Current: {round(api_hum, 1)}%")
-        
-    with c3:
-        micro_status = "Micro-climate Active" if abs(t_delta) > 2 else "Synced with Region"
-        st.metric("Micro-climate Status", micro_status, f"Deltas: T:{round(t_delta,1)} H:{round(h_delta,1)}")
-
     st.divider()
 
-    # --- VISUAL ANALYSIS ---
+    # Placeholders for live updates
+    m1, m2, m3 = st.columns(3)
+    t_ph = m1.empty(); h_ph = m2.empty(); s_ph = m3.empty()
+    
     chart_col1, chart_col2 = st.columns(2)
+    t_chart_ph = chart_col1.empty(); h_chart_ph = chart_col2.empty()
     
-    # Prepare Data for Charts
-    history_df = pd.DataFrame(list(st.session_state.history))
-    api_df = pd.DataFrame(list(st.session_state.api_history))
-    
-    with chart_col1:
-        st.subheader("🌡️ Temperature Convergence")
-        if not history_df.empty and not api_df.empty:
-            # Align lengths to avoid ValueError
-            min_len = min(len(history_df), len(api_df), 20)
-            comp_t = pd.DataFrame({
-                "Local Sensor": history_df['T'].tail(min_len).values,
-                "Regional API": api_df['T_API'].tail(min_len).values
-            })
-            st.area_chart(comp_t)
-        else:
-            st.info("Collecting data points for trend analysis...")
+    insight_ph = st.empty()
 
-    with chart_col2:
-        st.subheader("💧 Humidity Variance")
-        if not history_df.empty and not api_df.empty:
-            # Align lengths
-            min_len = min(len(history_df), len(api_df), 20)
-            comp_h = pd.DataFrame({
-                "Local Sensor": history_df['H'].tail(min_len).values,
-                "Regional API": api_df['H_API'].tail(min_len).values
-            })
-            st.line_chart(comp_h)
-        else:
-            st.info("Collecting data points for trend analysis...")
+    api_key = "bd5e378503939ddaee76f12ad7a97608" # Placeholder
 
-    # --- INSIGHTS ---
-    st.subheader("💡 Analysis Insights")
-    insight_c1, insight_c2 = st.columns(2)
-    with insight_c1:
-        if abs(t_delta) > 3:
-            st.warning("🚨 High Temperature Variance: Your farm is significantly warmer/cooler than the regional average. Check for irrigation needs or soil radiation.")
+    while True:
+        # 1. Get Sensor Data
+        s_l, s_t, s_h, s_is_sim = get_sensor_readings()
+        st.session_state.history.append({"L":s_l, "T":s_t, "H":s_h})
+        
+        # 2. Get API Data
+        weather_data = get_weather(api_key, city)
+        if weather_data:
+            api_temp = weather_data['main']['temp']
+            api_hum = weather_data['main']['humidity']
         else:
-            st.success("✅ Consistent with Regional Weather: Your sensors are well-calibrated and tracking regional trends.")
+            api_temp = 30 + random.uniform(-2, 2)
+            api_hum = 55 + random.uniform(-5, 5)
+        
+        st.session_state.api_history.append({"T_API": api_temp, "H_API": api_hum, "Time": datetime.now().strftime("%H:%M")})
+        
+        # 3. Calculations
+        t_delta = s_t - api_temp
+        h_delta = s_h - api_hum
+        micro_status = "Micro-climate Active" if abs(t_delta) > 2 else "Synced with Region"
+
+        # 4. Update Metrics
+        with t_ph.container():
+            st.metric("Temperature Comparison", f"{round(s_t, 1)}°C", f"{round(t_delta, 1)}°C vs API", delta_color="inverse")
+            st.caption(f"API Current: {round(api_temp, 1)}°C")
+        with h_ph.container():
+            st.metric("Humidity Comparison", f"{round(s_h, 1)}%", f"{round(h_delta, 1)}% vs API")
+            st.caption(f"API Current: {round(api_hum, 1)}%")
+        with s_ph.container():
+            st.metric("Micro-climate Status", micro_status, f"Deltas: T:{round(t_delta,1)} H:{round(h_delta,1)}")
+
+        # 5. Update Charts
+        history_df = pd.DataFrame(list(st.session_state.history))
+        api_df = pd.DataFrame(list(st.session_state.api_history))
+        
+        if len(history_df) > 1 and len(api_df) > 1:
+            min_len = min(len(history_df), len(api_df), 30)
             
-    with insight_c2:
-        st.info(f"📍 Location: {city} | Fusion Latency: Real-time (1s)")
+            with t_chart_ph.container():
+                st.subheader("🌡️ Temperature Convergence")
+                comp_t = pd.DataFrame({
+                    "Local Sensor": history_df['T'].tail(min_len).values,
+                    "Regional API": api_df['T_API'].tail(min_len).values
+                })
+                st.area_chart(comp_t)
+
+            with h_chart_ph.container():
+                st.subheader("💧 Humidity Variance")
+                comp_h = pd.DataFrame({
+                    "Local Sensor": history_df['H'].tail(min_len).values,
+                    "Regional API": api_df['H_API'].tail(min_len).values
+                })
+                st.line_chart(comp_h)
+        else:
+            t_chart_ph.info("🔄 Synchronizing data streams... Please wait.")
+
+        # 6. Update Insights
+        with insight_ph.container():
+            st.subheader("💡 Analysis Insights")
+            if abs(t_delta) > 3:
+                st.warning("🚨 High Temperature Variance detected.")
+            else:
+                st.success("✅ Regional Sync: Optimal.")
+            st.info(f"📍 Location: {city} | Fusion Latency: Real-time (2s)")
+
+        time.sleep(2)
 
 # ==========================================
 # 🧪 MODE: SOIL NUTRIENT ANALYSIS
