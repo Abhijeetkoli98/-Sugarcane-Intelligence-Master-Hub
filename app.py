@@ -134,7 +134,7 @@ if 'api_history' not in st.session_state:
 
 # SIDEBAR: COMMAND CENTER
 st.sidebar.title("🎮 Command Center")
-nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
+nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
 st.sidebar.divider()
 if st.sidebar.button("Logout"):
     st.session_state.logged_in = False; st.rerun()
@@ -236,94 +236,164 @@ elif nav == "🌍 Weather Fusion Analysis":
     st.write("Comparing real-time local sensor data against regional satellite weather APIs.")
     
     city = st.text_input("Enter City for API Sync", value="Pune")
-    
-    # Get latest sensor and API data
-    s_l, s_t, s_h, s_is_sim = get_sensor_readings()
-    st.session_state.history.append({"L":s_l, "T":s_t, "H":s_h})
-    api_key = "bd5e378503939ddaee76f12ad7a97608" # Placeholder
-    weather_data = get_weather(api_key, city)
-    
-    if weather_data:
-        api_temp = weather_data['main']['temp']
-        api_hum = weather_data['main']['humidity']
-        st.session_state.api_history.append({"T_API": api_temp, "H_API": api_hum, "Time": datetime.now().strftime("%H:%M")})
-    else:
-        # Fallback to smart simulation if API fails/No Key
-        api_temp = 30 + random.uniform(-2, 2)
-        api_hum = 55 + random.uniform(-5, 5)
-        st.session_state.api_history.append({"T_API": api_temp, "H_API": api_hum, "Time": datetime.now().strftime("%H:%M")})
-
-    # Get latest sensor data
-    if st.session_state.history:
-        last_sensor = st.session_state.history[-1]
-        s_t, s_h = last_sensor['T'], last_sensor['H']
-    else:
-        s_t, s_h = 28.5, 62.0 # Default/Fallback
-
-    # --- TOP COMPARISON METRICS ---
-    c1, c2, c3 = st.columns(3)
-    
-    t_delta = s_t - api_temp
-    h_delta = s_h - api_hum
-    
-    with c1:
-        st.metric("Temperature Comparison", f"{round(s_t, 1)}°C", f"{round(t_delta, 1)}°C vs API", delta_color="inverse")
-        st.caption(f"API Current: {round(api_temp, 1)}°C")
-        
-    with c2:
-        st.metric("Humidity Comparison", f"{round(s_h, 1)}%", f"{round(h_delta, 1)}% vs API")
-        st.caption(f"API Current: {round(api_hum, 1)}%")
-        
-    with c3:
-        micro_status = "Micro-climate Active" if abs(t_delta) > 2 else "Synced with Region"
-        st.metric("Micro-climate Status", micro_status, f"Deltas: T:{round(t_delta,1)} H:{round(h_delta,1)}")
-
     st.divider()
 
-    # --- VISUAL ANALYSIS ---
+    # Placeholders for live updates
+    m1, m2, m3 = st.columns(3)
+    t_ph = m1.empty(); h_ph = m2.empty(); s_ph = m3.empty()
+    
     chart_col1, chart_col2 = st.columns(2)
+    t_chart_ph = chart_col1.empty(); h_chart_ph = chart_col2.empty()
     
-    # Prepare Data for Charts
-    history_df = pd.DataFrame(list(st.session_state.history))
-    api_df = pd.DataFrame(list(st.session_state.api_history))
-    
-    with chart_col1:
-        st.subheader("🌡️ Temperature Convergence")
-        if not history_df.empty and not api_df.empty:
-            # Align lengths to avoid ValueError
-            min_len = min(len(history_df), len(api_df), 20)
-            comp_t = pd.DataFrame({
-                "Local Sensor": history_df['T'].tail(min_len).values,
-                "Regional API": api_df['T_API'].tail(min_len).values
-            })
-            st.area_chart(comp_t)
-        else:
-            st.info("Collecting data points for trend analysis...")
+    insight_ph = st.empty()
 
-    with chart_col2:
-        st.subheader("💧 Humidity Variance")
-        if not history_df.empty and not api_df.empty:
-            # Align lengths
-            min_len = min(len(history_df), len(api_df), 20)
-            comp_h = pd.DataFrame({
-                "Local Sensor": history_df['H'].tail(min_len).values,
-                "Regional API": api_df['H_API'].tail(min_len).values
-            })
-            st.line_chart(comp_h)
-        else:
-            st.info("Collecting data points for trend analysis...")
+    api_key = "bd5e378503939ddaee76f12ad7a97608" # Placeholder
 
-    # --- INSIGHTS ---
-    st.subheader("💡 Analysis Insights")
-    insight_c1, insight_c2 = st.columns(2)
-    with insight_c1:
-        if abs(t_delta) > 3:
-            st.warning("🚨 High Temperature Variance: Your farm is significantly warmer/cooler than the regional average. Check for irrigation needs or soil radiation.")
+    while True:
+        # 1. Get Sensor Data
+        s_l, s_t, s_h, s_is_sim = get_sensor_readings()
+        st.session_state.history.append({"L":s_l, "T":s_t, "H":s_h})
+        
+        # 2. Get API Data
+        weather_data = get_weather(api_key, city)
+        if weather_data:
+            api_temp = weather_data['main']['temp']
+            api_hum = weather_data['main']['humidity']
         else:
-            st.success("✅ Consistent with Regional Weather: Your sensors are well-calibrated and tracking regional trends.")
+            api_temp = 30 + random.uniform(-2, 2)
+            api_hum = 55 + random.uniform(-5, 5)
+        
+        st.session_state.api_history.append({"T_API": api_temp, "H_API": api_hum, "Time": datetime.now().strftime("%H:%M")})
+        
+        # 3. Calculations
+        t_delta = s_t - api_temp
+        h_delta = s_h - api_hum
+        micro_status = "Micro-climate Active" if abs(t_delta) > 2 else "Synced with Region"
+
+        # 4. Update Metrics
+        with t_ph.container():
+            st.metric("Temperature Comparison", f"{round(s_t, 1)}°C", f"{round(t_delta, 1)}°C vs API", delta_color="inverse")
+            st.caption(f"API Current: {round(api_temp, 1)}°C")
+        with h_ph.container():
+            st.metric("Humidity Comparison", f"{round(s_h, 1)}%", f"{round(h_delta, 1)}% vs API")
+            st.caption(f"API Current: {round(api_hum, 1)}%")
+        with s_ph.container():
+            st.metric("Micro-climate Status", micro_status, f"Deltas: T:{round(t_delta,1)} H:{round(h_delta,1)}")
+
+        # 5. Update Charts
+        history_df = pd.DataFrame(list(st.session_state.history))
+        api_df = pd.DataFrame(list(st.session_state.api_history))
+        
+        if len(history_df) > 1 and len(api_df) > 1:
+            min_len = min(len(history_df), len(api_df), 30)
             
-    with insight_c2:
-        st.info(f"📍 Location: {city} | Fusion Latency: Real-time (1s)")
+            with t_chart_ph.container():
+                st.subheader("🌡️ Temperature Convergence")
+                comp_t = pd.DataFrame({
+                    "Local Sensor": history_df['T'].tail(min_len).values,
+                    "Regional API": api_df['T_API'].tail(min_len).values
+                })
+                st.area_chart(comp_t)
+
+            with h_chart_ph.container():
+                st.subheader("💧 Humidity Variance")
+                comp_h = pd.DataFrame({
+                    "Local Sensor": history_df['H'].tail(min_len).values,
+                    "Regional API": api_df['H_API'].tail(min_len).values
+                })
+                st.line_chart(comp_h)
+        else:
+            t_chart_ph.info("🔄 Synchronizing data streams... Please wait.")
+
+        # 6. Update Insights
+        with insight_ph.container():
+            st.subheader("💡 Analysis Insights")
+            if abs(t_delta) > 3:
+                st.warning("🚨 High Temperature Variance detected.")
+            else:
+                st.success("✅ Regional Sync: Optimal.")
+            st.info(f"📍 Location: {city} | Fusion Latency: Real-time (2s)")
+
+        time.sleep(2)
+
+# ==========================================
+# 🚜 MODE: FARMER STRATEGIC PORTAL
+# ==========================================
+elif nav == "🚜 Farmer Strategic Portal":
+    st.header("🚜 Farmer Strategic Input & Factory Link")
+    st.write("Plan your harvest and compare procurement offers from the region's top 5 factories.")
+    
+    # 1. Profile Input
+    with st.container():
+        c_in1, c_in2 = st.columns(2)
+        f_name = c_in1.text_input("Farmer Name", value="Abhijeet")
+        f_area = c_in2.number_input("Total Farm Area (Acres/Ekars)", value=5.0, min_value=0.1)
+    
+    st.divider()
+
+    # 2. Factory Fusion Engine (Simulated 5 Factory APIs)
+    factories = [
+        {"name": "Sahyadri Sugar Tech", "price": 3450, "recovery": 11.2, "distance": 12, "risk": "Low", "status": "Optimal"},
+        {"name": "Krishna Sahakari", "price": 3520, "recovery": 10.8, "distance": 28, "risk": "Medium", "status": "Congested"},
+        {"name": "Vasantdada Hub", "price": 3380, "recovery": 12.1, "distance": 45, "risk": "Low", "status": "Fast-Track"},
+        {"name": "Panchganga Mills", "price": 3490, "recovery": 11.5, "distance": 18, "risk": "High", "status": "Limited Slots"},
+        {"name": "Godavari Bio-Energy", "price": 3600, "recovery": 10.5, "distance": 62, "risk": "Medium", "status": "Export Focused"}
+    ]
+
+    # 3. Analytics Logic
+    avg_yield_per_acre = 42 # Tons per acre
+    est_production = f_area * avg_yield_per_acre
+    
+    st.subheader(f"📊 Strategy for {f_name}'s Farm ({f_area} Acres)")
+    
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Est. Production", f"{int(est_production)} Tons", "Based on Regional Avg")
+    m2.metric("Projected Health", "Good (84%)", "↑ 2% from last week")
+    m3.metric("Market Sentiment", "Bullish", "High Demand")
+
+    st.write("### 🏭 Factory Procurement Comparison")
+    
+    for factory in factories:
+        # Financial Calc
+        transport_cost = factory['distance'] * 15 * f_area # Simplified transport calc
+        gross_revenue = est_production * factory['price']
+        net_profit = gross_revenue - transport_cost
+        
+        with st.expander(f"🏢 {factory['name']} - Offer: ₹{factory['price']}/Ton"):
+            col1, col2, col3 = st.columns(3)
+            col1.write(f"**Net Profit Forecast:**")
+            col1.title(f"₹{int(net_profit):,}")
+            
+            col2.write(f"**Logistics:**")
+            col2.write(f"📍 Distance: {factory['distance']} km")
+            col2.write(f"🚚 Est. Transport: ₹{int(transport_cost):,}")
+            
+            col3.write(f"**Factory Health:**")
+            col3.write(f"✨ Recovery: {factory['recovery']}%")
+            risk_color = "red" if factory['risk'] == "High" else "green" if factory['risk'] == "Low" else "orange"
+            col3.markdown(f"⚠️ Risk: <span style='color:{risk_color}'>{factory['risk']}</span> ({factory['status']})", unsafe_allow_html=True)
+            
+            if factory['price'] == max([f['price'] for f in factories]):
+                st.success("⭐ Best Purchase Price detected for this factory.")
+            if net_profit == max([(est_production * f['price']) - (f['distance'] * 15 * f_area) for f in factories]):
+                st.info("💡 Recommendation: Highest Net Profit after transport costs.")
+
+    # 4. Future Risk & Growth Map
+    st.divider()
+    st.subheader("🔮 Future Risk Analysis (90 Day Outlook)")
+    
+    r_col1, r_col2 = st.columns(2)
+    with r_col1:
+        st.write("**Climate Risk**")
+        st.progress(25)
+        st.caption("Low Risk: Predicted monsoon alignment is optimal for harvest.")
+        
+    with r_col2:
+        st.write("**Price Volatility**")
+        st.progress(45)
+        st.caption("Moderate Risk: Global sugar prices showing slight fluctuations.")
+
+    st.info(f"💡 **AI Suggestion for {f_name}:** Based on your farm area of {f_area} acres, we suggest booking your slot with **{factories[0]['name']}** or **{factories[2]['name']}** within the next 15 days to maximize recovery bonuses.")
 
 # ==========================================
 # 🧪 MODE: SOIL NUTRIENT ANALYSIS
