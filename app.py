@@ -475,7 +475,7 @@ elif nav == "🚜 Farmer Strategic Portal":
         st.progress(45)
         st.caption("Moderate Risk: Global sugar prices showing slight fluctuations.")
 
-    st.info(f"💡 **AI Suggestion for {f_name}:** Based on your farm area of {f_area} acres, we suggest booking your slot with **{factories[0]['name']}** or **{factories[2]['name']}** within the next 15 days to maximize recovery bonuses.")
+    st.info(f"💡 **AI Suggestion for {f_name}:** Based on your farm area of {f_area} acres, we suggest monitoring local recovery rates and booking your procurement slot early to maximize your transport bonuses.")
 
 
 # ==========================================
