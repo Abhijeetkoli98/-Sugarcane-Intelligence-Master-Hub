@@ -27,8 +27,72 @@ LOCAL_FACTORY_DB = {
     "belgaum": {"name": "Hira Sugar Works", "price": 3620, "recovery": 12.8, "distance": 18, "risk": "Low", "status": "Export Focused"},
     "karad": {"name": "Sahyadri Sahakari", "price": 3480, "recovery": 11.5, "distance": 7, "risk": "Low", "status": "Optimal"},
     "ichalkaranji": {"name": "Dutta Sahakari", "price": 3530, "recovery": 11.9, "distance": 11, "risk": "Medium", "status": "Stable"},
-    "kagal": {"name": "Chh. Shahu Mill", "price": 3590, "recovery": 12.3, "distance": 5, "risk": "Low", "status": "Local Best"}
+    "kagal": {"name": "Chh. Shahu Mill", "price": 3590, "recovery": 12.3, "distance": 5, "risk": "Low", "status": "Local Best"},
+    "ishwarpur": {"name": "Rajarambapu Patil Factory", "price": 3520, "recovery": 11.9, "distance": 8, "risk": "Low", "status": "Stable"},
+    "shirol": {"name": "Shree Datta Shetkari Mill", "price": 3610, "recovery": 12.5, "distance": 6, "risk": "Low", "status": "High Recovery"},
+    "borgaon": {"name": "Baliraja Sugar Mill", "price": 3440, "recovery": 11.1, "distance": 12, "risk": "Medium", "status": "Regional"},
+    "nrusinhwadi": {"name": "Datta Prasad Hub", "price": 3490, "recovery": 11.4, "distance": 4, "risk": "Low", "status": "Verified"},
+    "hatkanangle": {"name": "Sajjan Sugar Mill", "price": 3550, "recovery": 12.0, "distance": 7, "risk": "Low", "status": "Optimal"},
+    "audumbarwadi": {"name": "Audumbar Sugar Mill", "price": 3460, "recovery": 11.2, "distance": 10, "risk": "Medium", "status": "Regional"},
+    "kirloskarwadi": {"name": "RLM Sugar Factory", "price": 3600, "recovery": 12.4, "distance": 15, "risk": "Low", "status": "Verified"},
+    "jat": {"name": "Jat Sugar Mill", "price": 3430, "recovery": 11.0, "distance": 20, "risk": "Medium", "status": "Regional"},
+    "kavathepiran": {"name": "Kavathepiran Factory", "price": 3570, "recovery": 12.2, "distance": 9, "risk": "Low", "status": "Stable"},
+    "tambewadi": {"name": "Tambe Wadi Mill", "price": 3450, "recovery": 11.1, "distance": 14, "risk": "Medium", "status": "Regional"},
+    "pethvadgaon": {"name": "Peth Vadgaon Factory", "price": 3510, "recovery": 11.8, "distance": 8, "risk": "Low", "status": "Verified"},
+    "miraj": {"name": "Miraj Sugar Works", "price": 3540, "recovery": 11.9, "distance": 13, "risk": "Medium", "status": "Stable"},
+    "lohani": {"name": "Lohani Sugar Mill", "price": 3470, "recovery": 11.3, "distance": 11, "risk": "Medium", "status": "Regional"},
+    "kavathemahankal": {"name": "Kavathe Mahankal Factory", "price": 3560, "recovery": 12.1, "distance": 16, "risk": "Medium", "status": "Stable"},
+    "mangur": {"name": "Mangur Mill", "price": 3420, "recovery": 10.9, "distance": 19, "risk": "Medium", "status": "Regional"}, 
+    "yavaluj": {"name": "Yavaluj Factory", "price": 3480, "recovery": 11.4, "distance": 22, "risk": "Medium", "status": "Regional"},
+    "jath": {"name": "Jath Sugar Mill", "price": 3410, "recovery": 10.8,     "distance": 25, "risk": "Medium", "status": "Regional"},
+    "shahapur": {"name": "Shahapur Factory", "price": 3520, "recovery": 11.7, "distance": 18, "risk": "Medium", "status": "Stable"},
+    "kumbhoj": {"name": "Kumbhoj Factory", "price": 3580, "recovery": 12.2, "distance": 7, "risk": "Low", "status": "Optimal"},
+    "takli": {"name": "Takli Factory", "price": 3470, "recovery": 11.3, "distance": 14, "risk": "Medium", "status": "Regional"},
+    "madhavnagar": {"name": "Madhavnagar Mill", "price": 3530, "recovery": 11.9, "distance": 9, "risk": "Low", "status": "Stable"},
+    "pune": {"name": "Pune Sugar Works", "price": 3400, "recovery": 10.7, "distance": 28, "risk": "Medium", "status": "Regional"},
+    "kolhapur": {"name": "Kolhapur Sugars", "price": 3550, "recovery": 12.0, "distance": 6, "risk": "Low", "status": "Optimal"},
+    "bhosga": {"name": "Bhosga Factory", "price": 3460, "recovery": 11.1, "distance": 17, "risk": "Medium", "status": "Regional"},
+    "kallapur": {"name": "Kallapur  Mill", "price": 3600, "recovery": 12.4, "distance": 21, "risk": "Low", "status": "Verified"},
+    "chinchli": {"name": "Chinchli Factory", "price": 3420, "recovery": 10.9, "distance": 12, "risk": "Medium", "status": "Stable"},
+    "hatkanangle": {"name": "Hatkanangle Sugars", "price": 3510, "recovery": 11.6, "distance": 8, "risk": "Low", "status": "Optimal"},
+    "narsingpur": {"name": "Narsingpur Factory", "price": 3440, "recovery": 11.0, "distance": 15, "risk": "Medium", "status": "Regional"},
+    "dudhal": {"name": "Dudhal Mill", "price": 3570, "recovery": 12.3, "distance": 5, "risk": "Low", "status": "High Recovery"},
+    "lohani": {"name": "Lohani Sugar Mill", "price": 3470, "recovery": 11.3, "distance": 11, "risk": "Medium", "status": "Regional"},
+    "kavathemahankal": {"name": "Kavathe Mahankal Factory", "price": 3560, "recovery": 12.1, "distance": 16, "risk": "Medium", "status": "Stable"},
+    "mangur": {"name": "Mangur Mill", "price": 3420, "recovery": 10.9, "distance": 19, "risk": "Medium", "status": "Regional"},
+    "yavaluj": {"name": "Yavaluj Factory", "price": 3480, "recovery": 11.4, "distance": 22, "risk": "Medium", "status": "Regional"},
+    "jath": {"name": "Jath Sugar Mill", "price": 3410, "recovery": 10.8, "distance": 25, "risk": "Medium", "status": "Regional"},
+    "shahapur": {"name": "Shahapur Factory", "price": 3520, "recovery": 11.7, "distance": 18, "risk": "Medium", "status": "Stable"},
+    "kumbhoj": {"name": "Kumbhoj Factory", "price": 3580, "recovery": 12.2, "distance": 7, "risk": "Low", "status": "Optimal"},
+    "takli": {"name": "Takli Factory", "price": 3470, "recovery": 11.3, "distance": 14, "risk": "Medium", "status": "Regional"},
+    "madhavnagar": {"name": "Madhavnagar Mill", "price": 3530, "recovery": 11.9, "distance": 9, "risk": "Low", "status": "Stable"},
+    "pune": {"name": "Pune Sugar Works", "price": 3400, "recovery": 10.7, "distance": 28, "risk": "Medium", "status": "Regional"},
+    "kolhapur": {"name": "Kolhapur Sugars", "price": 3550, "recovery": 12.0, "distance": 6, "risk": "Low", "status": "Optimal"},
+    "bhosga": {"name": "Bhosga Factory", "price": 3460, "recovery": 11.1, "distance": 17, "risk": "Medium", "status": "Regional"},
+    "kallapur": {"name": "Kallapur Mill", "price": 3600, "recovery": 12.4, "distance": 21, "risk": "Low", "status": "Verified"},
+    "chinchli": {"name": "Chinchli Factory", "price": 3420, "recovery": 10.9, "distance": 12, "risk": "Medium", "status": "Stable"},
+    "hatkanangle": {"name": "Hatkanangle Sugars", "price": 3510, "recovery": 11.6, "distance": 8, "risk": "Low", "status": "Optimal"},
+    "narsingpur": {"name": "Narsingpur Factory", "price": 3440, "recovery": 11.0, "distance": 15, "risk": "Medium", "status": "Regional"},
+    "dudhal": {"name": "Dudhal Mill", "price": 3570, "recovery": 12.3, "distance": 5, "risk": "Low", "status": "High Recovery"}, 
+    "lohani": {"name": "Lohani Sugar Mill", "price": 3470, "recovery": 11.3, "distance": 11, "risk": "Medium", "status": "Regional"},
+    "kavathemahankal": {"name": "Kavathe Mahankal Factory", "price": 3560, "recovery": 12.1, "distance": 16, "risk": "Medium", "status": "Stable"},
+    "mangur": {"name": "Mangur Mill", "price": 3420, "recovery": 10.9, "distance": 19, "risk": "Medium", "status": "Regional"},
+    "yavaluj": {"name": "Yavaluj Factory", "price": 3480, "recovery": 11.4, "distance": 22, "risk": "Medium", "status": "Regional"},
+    "jath": {"name": "Jath Sugar Mill", "price": 3410, "recovery": 10.8, "distance": 25, "risk": "Medium", "status": "Regional"},
+    "shahapur": {"name": "Shahapur Factory", "price": 3520, "recovery": 11.7, "distance": 18, "risk": "Medium", "status": "Stable"},
+    "kumbhoj": {"name": "Kumbhoj Factory", "price": 3580, "recovery": 12.2, "distance": 7, "risk": "Low", "status": "Optimal"},
+    "takli": {"name": "Takli Factory", "price": 3470, "recovery": 11.3, "distance": 14, "risk": "Medium", "status": "Regional"},
+    "madhavnagar": {"name": "Madhavnagar Mill", "price": 3530, "recovery": 11.9, "distance": 9, "risk": "Low", "status": "Stable"},
+    "pune": {"name": "Pune Sugar Works", "price": 3400, "recovery": 10.7, "distance": 28, "risk": "Medium", "status": "Regional"},
+    "kolhapur": {"name": "Kolhapur Sugars", "price": 3550, "recovery": 12.0, "distance": 6, "risk": "Low", "status": "Optimal"},
+    "bhosga": {"name": "Bhosga Factory", "price": 3460, "recovery": 11.1, "distance": 17, "risk": "Medium", "status": "Regional"},
+    "kallapur": {"name": "Kallapur Mill", "price": 3600, "recovery": 12.4, "distance": 21, "risk": "Low", "status": "Verified"},
+    "chinchli": {"name": "Chinchli Factory", "price": 3420, "recovery": 10.9, "distance": 12, "risk": "Medium", "status": "Stable"},
+    "hatkanangle": {"name": "Hatkanangle Sugars", "price": 3510, "recovery": 11.6, "distance": 8, "risk": "Low", "status": "Optimal"},
+    "narsingpur": {"name": "Narsingpur Factory", "price": 3440, "recovery": 11.0, "distance": 15, "risk": "Medium", "status": "Regional"},
+    "dudhal": {"name": "Dudhal Mill", "price": 3570, "recovery": 12.3, "distance": 5, "risk": "Low", "status": "High Recovery"} 
 }
+
 DEFAULT_FACTORY = {"name": "Maharashtra Cooperative Hub", "price": 3410, "recovery": 11.0, "distance": 30, "risk": "Medium", "status": "State Estimate"}
 
 st.set_page_config(page_title="Sugarcane AI Industrial Pro+", layout="wide", page_icon="🌾")
@@ -419,7 +483,6 @@ elif nav == "🚜 Farmer Strategic Portal":
             
             if real_data:
                 factory = real_data[0] # Nearest
-                st.success(f"🌐 LIVE DATA: {len(real_data)} real factories identified in the {f_loc} region.")
                 
                 # Financial Calc
                 transport_cost = factory['distance'] * 15 * f_area 
@@ -455,7 +518,6 @@ elif nav == "🚜 Farmer Strategic Portal":
                         for f in real_data[1:5]:
                             st.write(f"- **{f['name']}**: {f['distance']} km | ₹{f['price']}/Ton")
             else:
-                st.warning("⚠️ Live API could not find a match. Switching to Local Intelligence Database...")
                 # Search Local DB
                 search_query = f_loc.lower().strip()
                 factory = LOCAL_FACTORY_DB.get(search_query, DEFAULT_FACTORY)
@@ -465,7 +527,6 @@ elif nav == "🚜 Farmer Strategic Portal":
                 gross_revenue = est_production * factory['price']
                 net_profit = gross_revenue - transport_cost
 
-                st.success(f"📂 LOCAL MATCH: Best partner for '{f_loc}' identified from internal records.")
                 with st.container():
                     st.markdown(f"### 🏆 Local Best Match: {factory['name']}")
                     st.caption("Data Source: Internal Factory Database (Local Fallback)")
