@@ -754,8 +754,33 @@ elif nav == "🧪 Soil Nutrient Analysis":
 else:
     st.header("📁 Industrial Data Audit Center")
     if os.path.exists(LOG_FILE):
-        st.dataframe(pd.read_csv(LOG_FILE).tail(50))
+        df_audit = pd.read_csv(LOG_FILE)
+        st.subheader("🛡️ Compliance & Safety Audit")
+        total_logs = len(df_audit)
+        critical_logs = len(df_audit[df_audit['Status'].str.contains("Critical|Stress|Warning", na=False)])
+        compliance_pct = round(((total_logs - critical_logs) / total_logs) * 100, 1) if total_logs > 0 else 100
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Total Records", total_logs)
+        c2.metric("Compliance Score", f"{compliance_pct}%")
+        c3.metric("Anomaly Flag Count", critical_logs, delta=f"Critical Events", delta_color="inverse")
+        st.divider()
+        st.subheader("📈 Historical Sensor Audit")
+        audit_metric = st.selectbox("Select Parameter", ["T", "H", "L", "Y"])
+        metric_labels = {"T": "Temperature (°C)", "H": "Humidity (%)", "L": "Light (Lux)", "Y": "Yield Est."}
+        fig_audit = px.line(df_audit.tail(100), x="Timestamp", y=audit_metric, template="plotly_dark")
+        st.plotly_chart(fig_audit, use_container_width=True)
+        st.divider()
+        st.subheader("🗂️ Record Archive")
+        search_query = st.text_input("🔍 Search Logs")
+        if search_query:
+            display_df = df_audit[df_audit.apply(lambda row: search_query.lower() in row.astype(str).str.lower().values, axis=1)]
+        else:
+            display_df = df_audit.tail(20)
+        st.dataframe(display_df, use_container_width=True)
         with open(LOG_FILE, "rb") as f:
-            st.download_button("📥 Export Full Report (CSV)", f, "factory_audit.csv")
+            st.download_button("📥 Download Audit (CSV)", f, "factory_audit_pro.csv")
+        if st.session_state.user_role == "admin":
+            if st.button("🗑️ Purge Logs"):
+                os.remove(LOG_FILE); st.success("Log file purged."); st.rerun()
     else:
-        st.info("Awaiting initial factory telemetry data.")
+        st.info("📂 No logs found. Start monitoring to generate records.")
