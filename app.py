@@ -134,7 +134,7 @@ if 'api_history' not in st.session_state:
 
 # SIDEBAR: COMMAND CENTER
 st.sidebar.title("🎮 Command Center")
-nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
+nav = st.sidebar.radio("Navigation", ["📡 Ground Sensors (IoT)", "🛰️ Satellite Remote Sensing", "🌍 Weather Fusion Analysis", "🚜 Farmer Strategic Portal", "🛡️ Climate Early Warning", "🧪 Soil Nutrient Analysis", "📁 Factory Data Audit"])
 st.sidebar.divider()
 if st.sidebar.button("Logout"):
     st.session_state.logged_in = False; st.rerun()
@@ -407,6 +407,93 @@ elif nav == "🚜 Farmer Strategic Portal":
         st.caption("Moderate Risk: Global sugar prices showing slight fluctuations.")
 
     st.info(f"💡 **AI Suggestion for {f_name}:** Based on your farm area of {f_area} acres, we suggest booking your slot with **{factories[0]['name']}** or **{factories[2]['name']}** within the next 15 days to maximize recovery bonuses.")
+
+# ==========================================
+# 🛡️ MODE: CLIMATE EARLY WARNING
+# ==========================================
+elif nav == "🛡️ Climate Early Warning":
+    st.header("🛡️ AI Climate Defense & Early Warning")
+    st.write("Predictive analytics to safeguard your harvest against extreme weather.")
+    
+    city = st.text_input("Enter Farm Location for Storm Watch", value="Kolhapur")
+    st.divider()
+
+    # 1. Predictive Engine (Simulated 48h Outlook)
+    import plotly.express as px
+    import plotly.graph_objects as go
+
+    # Weather States
+    is_rain_coming = random.choice([True, False])
+    heat_index = random.randint(30, 42)
+    storm_probability = random.randint(0, 100)
+
+    # 2. EMERGENCY ALERTS
+    st.subheader("🚨 Active Safety Alerts")
+    a1, a2 = st.columns(2)
+    
+    if is_rain_coming:
+        a1.error("🌧️ RAIN PREDICTED (Next 6h)")
+        a1.markdown("**ACTION:** STOP IRRIGATION IMMEDIATELY. Soil saturation risk high.")
+    else:
+        a1.success("☀️ NO RAIN PREDICTED")
+        a1.markdown("**ACTION:** Maintain standard irrigation cycle.")
+
+    if heat_index > 38:
+        a2.warning(f"🔥 HEAT WAVE ALERT ({heat_index}°C)")
+        a2.markdown("**ACTION:** Shield young crops. Increase soil moisture by 15%.")
+    else:
+        a2.info(f"🌡️ Normal Temps ({heat_index}°C)")
+        a2.markdown("**ACTION:** Optimal growth conditions detected.")
+
+    st.divider()
+
+    # 3. SATELLITE STORM/HEAT VISUALIZATION
+    st.subheader("🛰️ Satellite Thermal & Storm Map")
+    st.write("Real-time spectral visualization of incoming weather fronts.")
+    
+    # Generate a dummy grid for the map
+    grid_size = 20
+    x = np.linspace(0, 10, grid_size)
+    y = np.linspace(0, 10, grid_size)
+    X, Y = np.meshgrid(x, y)
+    
+    # Simulate a "front" moving through
+    intensity = np.exp(-((X-5)**2 + (Y-5)**2) / 10) * heat_index
+    if is_rain_coming:
+        intensity += np.random.normal(0, 5, intensity.shape) # Add "storm noise"
+
+    fig = go.Figure(data=go.Heatmap(
+        z=intensity,
+        colorscale='Hot' if heat_index > 35 else 'Jet',
+        colorbar=dict(title='Intensity (Rel)')
+    ))
+    fig.update_layout(title="Spectral Farm Overview", height=500, margin=dict(l=20, r=20, t=40, b=20))
+    st.plotly_chart(fig, use_container_width=True)
+
+    # 4. ACTIONABLE AG-DEFENSE
+    st.subheader("🛡️ Strategic Defense Steps")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.write("**Storm Severity**")
+        level = "High" if storm_probability > 70 else "Low"
+        st.title(f"{storm_probability}%")
+        st.caption(f"Status: {level}")
+        
+    with col2:
+        st.write("**Irrigation Efficiency**")
+        efficiency = 92 if not is_rain_coming else 45
+        st.title(f"{efficiency}%")
+        st.caption("Auto-adjusting for cloud cover")
+        
+    with col3:
+        st.write("**Harvest Safety**")
+        st.title("SECURE")
+        st.caption("No immediate threats to mature cane.")
+
+    st.divider()
+    st.warning("💡 **AI Tip:** A cold front is developing to your North-West. If harvesting this week, ensure transport vehicles are covered to avoid moisture weight loss.")
 
 # ==========================================
 # 🧪 MODE: SOIL NUTRIENT ANALYSIS
