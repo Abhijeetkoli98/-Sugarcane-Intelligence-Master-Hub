@@ -644,79 +644,97 @@ elif nav == "🔮 AI Harvest Predictor":
 # 🏢 MODE: FACTORY STORAGE OPTIMIZER
 # ==========================================
 elif nav == "🏢 Factory Storage Optimizer":
-    st.header("🏢 Industrial Storage Intelligence & Spoilage AI")
-    st.write("Advanced decision support for factory managers to minimize post-harvest sucrose loss.")
+    st.header("🏢 Enterprise Storage Intelligence (Pro+ Analytics)")
+    st.write("Advanced industrial decision support for large-scale sucrose preservation.")
     
     # 1. Multi-Unit Monitoring
-    unit_id = st.selectbox("Select Storage Asset / Unit", ["Silo Alpha (Primary)", "Silo Beta (Overflow)", "Warehouse 01 (Buffer)", "Warehouse 02 (Processing)"])
+    unit_id = st.selectbox("Select Industrial Asset", ["Silo Alpha (Primary)", "Silo Beta (High-Cap)", "Warehouse 01", "Warehouse 02"])
     
-    with st.expander(f"📥 Industrial Parameter Input: {unit_id}", expanded=True):
+    with st.expander(f"⚙️ Control Parameters: {unit_id}", expanded=True):
         col1, col2, col3 = st.columns(3)
-        s_temp = col1.slider("Storage Temperature (°C)", 15.0, 45.0, 22.0)
-        s_hum = col2.slider("Relative Humidity (%)", 30, 95, 65)
-        s_light = col3.selectbox("Exposure Level", ["Dark / Shielded", "Subdued", "Ambient", "Direct Sun"])
+        s_temp = col1.slider("Ambient Temperature (°C)", 10.0, 50.0, 24.0)
+        s_hum = col2.slider("Internal Humidity (%)", 10, 100, 65)
+        s_qty = col3.number_input("Unit Quantity (Metric Tons)", 100, 100000, 10000)
         
         col4, col5, col6 = st.columns(3)
-        s_dur = col4.number_input("Current Storage Duration (Days)", 0, 120, 5)
-        s_qty = col5.number_input("Stashed Quantity (Metric Tons)", 100, 50000, 5000)
-        s_vent = col6.selectbox("Ventilation Status", ["Active Forced", "Natural Draft", "Restricted", "Stagnant"])
+        s_dur = col4.number_input("Days in Storage", 0, 150, 7)
+        s_vent = col5.select_slider("Ventilation Strength", options=["None", "Low", "Medium", "High", "Turbo"], value="Medium")
+        s_cost = col6.number_input("Market Value (₹/Ton)", 3000, 4500, 3600)
 
-    # --- AI DEGRADATION ENGINE ---
+    # --- ADVANCED BIOLOGICAL MODEL (Industrial Grade) ---
+    # Base sucrose loss per day (biological respiration)
+    base_decay = 0.08 
+    # Exponential factors for Temp and Hum
+    temp_impact = (s_temp / 20)**2.2
+    hum_impact = (s_hum / 60)**1.8
+    # Ventilation bonus
+    vent_map = {"None": 1.2, "Low": 1.0, "Medium": 0.8, "High": 0.6, "Turbo": 0.4}
+    vent_factor = vent_map[s_vent]
+    
+    daily_decay_rate = (base_decay * temp_impact * hum_impact * vent_factor) # % per day
+    total_loss_pct = s_dur * daily_decay_rate
+    current_quality = max(0, 100 - total_loss_pct)
+    
+    total_val = s_qty * s_cost
+    lost_val = total_val * (total_loss_pct / 100)
+    
+    # --- INDUSTRIAL KPIs ---
     st.divider()
+    k1, k2, k3, k4 = st.columns(4)
     
-    # Sucrose Loss Logic (Simplified Industrial Model)
-    # Loss accelerates above 25C and 70% humidity
-    temp_factor = max(0, (s_temp - 25)) * 1.5
-    hum_factor = max(0, (s_hum - 70)) * 0.8
-    vent_penalty = 1.0 if s_vent == "Stagnant" else 0.5 if s_vent == "Restricted" else 0
+    # Logic for Priority
+    if total_loss_pct > 15: p_label, p_color = "🔴 CRITICAL", "red"
+    elif total_loss_pct > 5: p_label, p_color = "🟡 MODERATE", "orange"
+    else: p_label, p_color = "🟢 STABLE", "green"
     
-    daily_decay_rate = (temp_factor + hum_factor + (vent_penalty * 10)) / 100 # % loss per day
-    total_degradation = s_dur * daily_decay_rate
-    quality_score = max(0, 100 - total_degradation)
-    
-    # Categorize
-    if quality_score > 85: q_label = "Optimal (Premium)"; q_color = "green"
-    elif quality_score > 65: q_label = "Stable (Processable)"; q_color = "orange"
-    else: q_label = "Critical (High Spoilage)"; q_color = "red"
+    k1.metric("Crush Priority", p_label)
+    k2.metric("Storage Efficiency", f"{round(100 - total_loss_pct, 1)}%")
+    k3.metric("Daily Value Leak", f"₹{int(total_val * (daily_decay_rate/100)):,}")
+    k4.metric("Asset Valuation", f"₹{int(total_val/1000000)}M")
 
-    # --- ANALYTICS DASHBOARD ---
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Storage Integrity", q_label)
-    m2.metric("Sucrose Loss Index", f"{round(total_degradation, 2)}%", delta=f"{round(daily_decay_rate,2)}%/day", delta_color="inverse")
-    m3.metric("Est. Industrial Value Loss", f"₹{int(s_qty * (total_degradation/100) * 3500):,}", "At Current Recovery")
-
-    # Trend Visualization
-    st.subheader("📅 Quality Degradation Outlook (Next 30 Days)")
-    future_days = list(range(s_dur, s_dur + 31))
-    future_quality = [max(0, 100 - (d * daily_decay_rate)) for d in future_days]
+    # --- COMPARATIVE TREND ANALYSIS ---
+    st.subheader("📊 Comparative Spoilage Forecast (30 Days)")
     
-    fig_decay = px.area(x=future_days, y=future_quality, labels={'x': 'Storage Day', 'y': 'Quality Score (%)'}, title=f"AI Spoilage Prediction: {unit_id}")
-    fig_decay.update_traces(line_color="red" if quality_score < 70 else "blue")
-    st.plotly_chart(fig_decay, use_container_width=True)
+    # Simulation for "Optimized" (e.g. Temp at 20C, Hum at 50%)
+    opt_daily_decay = (base_decay * (20/20)**2.2 * (50/60)**1.8 * 0.6)
+    
+    days_range = list(range(s_dur, s_dur + 31))
+    trend_curr = [max(0, 100 - (d * daily_decay_rate)) for d in days_range]
+    trend_opt = [max(0, 100 - (d * opt_daily_decay)) for d in days_range]
+    
+    df_trend = pd.DataFrame({
+        "Day": days_range,
+        "Current Protocol": trend_curr,
+        "Optimized (AI Suggestion)": trend_opt
+    })
+    
+    fig_comp = px.line(df_trend, x="Day", y=["Current Protocol", "Optimized (AI Suggestion)"], 
+                      title="Quality Preservation Index: Reality vs Optimization",
+                      color_discrete_map={"Current Protocol": "red", "Optimized (AI Suggestion)": "cyan"})
+    st.plotly_chart(fig_comp, use_container_width=True)
 
-    # --- RECOMMENDATION & PRIORITY ALERTS ---
+    # --- FINANCIAL IMPACT & WHAT-IF ---
     st.divider()
-    rec_col, alert_col = st.columns(2)
+    f1, f2 = st.columns(2)
     
-    with rec_col:
-        st.subheader("🛠️ Management Optimization")
-        if s_temp > 30:
-            st.info("❄️ **Cooling**: Activate industrial chillers. Target 22°C to halve sucrose inversion rates.")
-        if s_hum > 75:
-            st.warning("💨 **Dehumidification**: Activate exhaust fans. Current humidity promotes fungal growth.")
-        if s_vent == "Stagnant":
-            st.error("🌪️ **Ventilation**: Immediate override required. Natural draft is insufficient for current volume.")
-        if quality_score > 90:
-            st.success("✨ **Practice**: Current storage protocol is Grade-A. No adjustments needed.")
+    with f1:
+        st.subheader("💰 Financial Impact")
+        st.write(f"Total Value in {unit_id}: **₹{int(total_val):,}**")
+        st.write(f"Estimated Revenue Leakage: <span style='color:red'>-₹{int(lost_val):,}</span>", unsafe_allow_html=True)
+        st.write(f"Current Recovery Grade: **{'Grade A' if current_quality > 90 else 'Grade B' if current_quality > 75 else 'Grade C'}**")
 
-    with alert_col:
-        st.subheader("⚠️ Priority Action Alerts")
-        if quality_score < 60:
-            st.error(f"🚨 **IMMEDIATE DISPATCH**: Spoilage risk in {unit_id} exceeds 40%. Move to crushing within 12 hours.")
-        elif total_degradation > 10:
-            st.warning("🔔 **MODERATE PRIORITY**: Schedule this unit for the next production batch to prevent further loss.")
-        else:
-            st.success("🛡️ **SAFE**: Unit remains in the safety zone for the next 72 hours.")
+    with f2:
+        st.subheader("🚀 ROI from Optimization")
+        savings = (total_loss_pct - (s_dur * opt_daily_decay)) / 100 * total_val
+        st.success(f"Potential Savings: **₹{int(max(0, savings)):,}**")
+        st.write("By reducing temperature to **20°C** and optimizing ventilation, you can preserve significant factory revenue.")
+        
+    # --- STRATEGIC ALERTS ---
+    st.divider()
+    if total_loss_pct > 10:
+        st.error(f"🚨 **ALERT**: Spoilage front detected in {unit_id}. Priority dispatch to Crushing Floor recommended within 24 hours.")
+    else:
+        st.success("✅ **STABLE**: Environmental parameters are within the safe industrial buffer.")
 
 # ==========================================
 # 🧪 MODE: SOIL NUTRIENT ANALYSIS
