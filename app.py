@@ -209,21 +209,33 @@ def process_satellite_ai(uploaded_file):
 
 def get_sensor_readings():
     """Universal sensor interface (Serial + Simulation fallback)"""
+    is_connected = False
     try:
         if 'ser' not in st.session_state:
             import serial
+            # Try COM8 as default, but wrap in try-except
             st.session_state.ser = serial.Serial("COM8", 9600, timeout=1)
+        
         ser = st.session_state.ser
-    except: ser = None
+        if ser and ser.is_open:
+            is_connected = True
+    except: 
+        st.session_state.ser = None
+        ser = None
 
     l, t, h = None, None, None
     is_sim = False
     
-    if ser and ser.in_waiting > 0:
+    if ser and is_connected:
         try:
-            line = ser.readline().decode(errors='ignore').strip()
-            if "," in line: l, t, h = map(float, line.split(","))
-        except: pass
+            if ser.in_waiting > 0:
+                line = ser.readline().decode(errors='ignore').strip()
+                if "," in line: 
+                    parts = line.split(",")
+                    if len(parts) == 3:
+                        l, t, h = map(float, parts)
+        except: 
+            is_connected = False
     
     if l is None:
         # High-Fidelity Simulation for Presentation
@@ -232,7 +244,7 @@ def get_sensor_readings():
         h = 60 + random.uniform(-2, 2)
         is_sim = True
         
-    return l, t, h, is_sim
+    return l, t, h, is_sim, is_connected
 
 # --- AUTH LAYER ---
 if 'logged_in' not in st.session_state:
