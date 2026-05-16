@@ -223,7 +223,7 @@ def get_sensor_readings():
         st.session_state.ser = None
         ser = None
 
-    l, t, h = None, None, None
+    l, t, h, sm = None, None, None, None
     is_sim = False
     
     if ser and is_connected:
@@ -232,19 +232,31 @@ def get_sensor_readings():
                 line = ser.readline().decode(errors='ignore').strip()
                 if "," in line: 
                     parts = line.split(",")
-                    if len(parts) == 3:
-                        l, t, h = map(float, parts)
+                    # NodeMCU should send 4 values: LDR, Temp, Humidity, Soil Moisture
+                    if len(parts) >= 4:
+                        try:
+                            l, t, h, sm = map(float, parts[:4])
+                        except ValueError:
+                            pass # Safely handle incomplete data parsing errors
+                    elif len(parts) == 3: # Backward compatibility
+                        try:
+                            l, t, h = map(float, parts[:3])
+                            sm = 45.0 # fallback for Soil Moisture
+                        except ValueError:
+                            pass
         except: 
             is_connected = False
     
-    if l is None:
+    if l is None or t is None or h is None or sm is None:
         # High-Fidelity Simulation for Presentation
         l = random.randint(400, 900)
         t = 28 + random.uniform(-1, 1)
         h = 60 + random.uniform(-2, 2)
+        sm = 50 + random.uniform(-5, 5) # Soil moisture simulation
         is_sim = True
         
-    return l, t, h, is_sim, is_connected
+    # Return exactly 5 values
+    return l, t, h, sm, is_sim
 
 # --- AUTH LAYER ---
 if 'logged_in' not in st.session_state:
@@ -331,8 +343,8 @@ if nav == "🛰️ Satellite Remote Sensing":
 elif nav == "📡 Ground Sensors (IoT)":
     st.header("📡 Live IoT Field Monitoring")
     # Top Stats
-    m1, m2, m3, m4 = st.columns(4)
-    l_m = m1.empty(); t_m = m2.empty(); h_m = m3.empty(); hb_m = m4.empty()
+    m1, m2, m3, m4, m5 = st.columns(5)
+    l_m = m1.empty(); t_m = m2.empty(); h_m = m3.empty(); sm_m = m4.empty(); hb_m = m5.empty()
     st.divider()
     
     col_live1, col_live2 = st.columns([2, 1])
@@ -347,23 +359,25 @@ elif nav == "📡 Ground Sensors (IoT)":
 
     # --- SENSOR ENGINE ---
     while True:
-        l, t, h, is_sim = get_sensor_readings()
+        l, t, h, sm, is_sim = get_sensor_readings()
 
         if l is not None:
-            st.session_state.history.append({"L":l, "T":t, "H":h})
+            st.session_state.history.append({"L":l, "T":t, "H":h, "SM":sm})
             df_curr = pd.DataFrame(list(st.session_state.history))
             y_curr = round(42 * (l/1000) * (1 - abs(t-28)/100), 2)
             
-            l_m.metric("☀ Lux Intensity", int(l))
-            t_m.metric("🌡 Temperature", f"{round(t,1)}°C")
-            h_m.metric("💧 Humidity", f"{round(h,1)}%")
-            hb_m.metric("📡 Status", "ONLINE" if not is_sim else "SIMULATED", datetime.now().strftime("%H:%M:%S"))
+            l_m.metric("☀ Lux", int(l))
+            t_m.metric("🌡 Temp", f"{round(t,1)}°C")
+            h_m.metric("💧 Hum", f"{round(h,1)}%")
+            sm_m.metric("🌱 Soil", f"{round(sm,1)}%")
+            hb_m.metric("📡 Status", "SIM" if is_sim else "LIVE", datetime.now().strftime("%H:%M:%S"))
             
             chart_ph.line_chart(df_curr)
             
             with alert_ph.container():
                 if t > 33: st.warning("⚠️ Heat Stress Detected")
                 elif h < 45: st.error("💧 Critical Water Stress")
+                elif sm < 30: st.error("🌵 Soil is too dry")
                 else: st.success("✅ Growth: Optimal")
             
             with stats_ph.container():
@@ -395,8 +409,8 @@ elif nav == "🌍 Weather Fusion Analysis":
 
     while True:
         # 1. Get Sensor Data
-        s_l, s_t, s_h, s_is_sim = get_sensor_readings()
-        st.session_state.history.append({"L":s_l, "T":s_t, "H":s_h})
+        s_l, s_t, s_h, s_sm, s_is_sim = get_sensor_readings()
+        st.session_state.history.append({"L":s_l, "T":s_t, "H":s_h, "SM":s_sm})
         
         # 2. Get API Data
         weather_data = get_weather(api_key, city)
